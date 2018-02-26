@@ -1,11 +1,15 @@
-import UInjector from './uiInjector'
+import UInjector from './services/uiInjector'
+import facebookSdk from './services/facebookSdk'
+
 export default {
-  start (taistApi) {
-    this._uiInjector = new UInjector(taistApi)
+  async start (taistApi, dataApi) {
+    this._uiInjector = new UInjector(taistApi, dataApi)
+
+    await facebookSdk.init()
     this._setRoutes(taistApi)
   },
 
-  _setRoutes (taistApi) {
+  _setRoutes (taistApi, dataApi) {
     let routeProcessorsByUrlHashes = this._getRouteProcessorsByUrlHashes();
 
     for (let hashRegexp in routeProcessorsByUrlHashes) {

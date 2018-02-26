@@ -1,11 +1,12 @@
 import jquery from 'jquery';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import IntegrationSettings from '../components/IntegrationSettings'
 
-import IntegrationSettings from './components/IntegrationSettings'
 export default class UiInjector {
-  constructor (taistApi) {
+  constructor (taistApi, dataApi) {
     this._taistApi = taistApi
+    this._dataApi = dataApi
   }
 
   renderSettings () {
@@ -17,6 +18,7 @@ export default class UiInjector {
       })
 
       ReactDOM.render(<IntegrationSettings
+        dataApi={this._dataApi}
       />, container)
     })
   }

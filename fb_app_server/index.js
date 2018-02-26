@@ -2,6 +2,7 @@ var bodyParser = require('body-parser');
 var express = require('express');
 var app = express();
 var xhub = require('express-x-hub');
+var path = require('path')
 
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'));
@@ -12,7 +13,7 @@ app.use(bodyParser.json());
 var token = process.env.FACEBOOK_WEBHOOK_VERIFICATION_TOKEN || 'token';
 var received_updates = [];
 
-app.get('/', function(req, res) {
+app.get('/debug', function(req, res) {
   console.log(req);
   res.send('<pre>' + JSON.stringify(received_updates, null, 2) + '</pre>');
 });
@@ -44,5 +45,7 @@ app.post(facebookWebhookEndpointPath, function(req, res) {
   received_updates.unshift(req.body);
   res.sendStatus(200);
 });
+
+app.use('/', express.static(path.join(__dirname, 'public')))
 
 app.listen();

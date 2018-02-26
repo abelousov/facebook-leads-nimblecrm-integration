@@ -31,11 +31,13 @@
     }
   },
   "dependencies": {
+    "babel-preset-es2017": "^6.24.1",
     "body-parser": "~1.15.0",
     "cross-env": "5.1.2",
     "express": "~4.13.3",
     "express-x-hub": "^1.0.4",
     "jquery": "^3.3.1",
+    "q": "^1.5.1",
     "react": "16.2.0",
     "react-dom": "16.2.0",
     "react-hot-loader": "4.0.0-rc.0",
@@ -47,7 +49,6 @@
     "babel-eslint": "8.1.2",
     "babel-jest": "22.4.0",
     "babel-loader": "7.1.3",
-    "babel-preset-es2015": "6.24.1",
     "babel-preset-react": "6.24.1",
     "babel-preset-react-boilerplate": "1.1.1",
     "babel-preset-react-hmre": "1.1.1",
