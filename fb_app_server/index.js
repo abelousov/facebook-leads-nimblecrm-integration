@@ -6,10 +6,10 @@ var xhub = require('express-x-hub');
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'));
 
-app.use(xhub({ algorithm: 'sha1', secret: process.env.APP_SECRET }));
+app.use(xhub({ algorithm: 'sha1', secret: process.env.FACEBOOK_APP_SECRET }));
 app.use(bodyParser.json());
 
-var token = process.env.TOKEN || 'token';
+var token = process.env.FACEBOOK_WEBHOOK_VERIFICATION_TOKEN || 'token';
 var received_updates = [];
 
 app.get('/', function(req, res) {
@@ -17,7 +17,9 @@ app.get('/', function(req, res) {
   res.send('<pre>' + JSON.stringify(received_updates, null, 2) + '</pre>');
 });
 
-app.get(['/facebook', '/instagram'], function(req, res) {
+const facebookWebhookEndpointPath = '/facebook'
+
+app.get(facebookWebhookEndpointPath, function(req, res) {
   if (
     req.param('hub.mode') == 'subscribe' &&
     req.param('hub.verify_token') == token
@@ -28,7 +30,7 @@ app.get(['/facebook', '/instagram'], function(req, res) {
   }
 });
 
-app.post('/facebook', function(req, res) {
+app.post(facebookWebhookEndpointPath, function(req, res) {
   console.log('Facebook request body:', req.body);
 
   if (!req.isXHubValid()) {
