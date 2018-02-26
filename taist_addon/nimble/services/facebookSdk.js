@@ -1,5 +1,6 @@
-import constants from '../constants';
+import constants from '../../../shared/constants';
 import taistApiSingleton from '../../taistApiSingleton';
+import appServerApi from './appServerApi'
 
 let FB
 export default {
@@ -18,50 +19,56 @@ export default {
     })
   },
 
-  checkLogin () {
-    return new Promise(function (resolve) {
-      FB.getLoginStatus(function (status) {
-        resolve(status)
-      })
-    })
+  async checkLogin () {
+    return this._authorize({ useExistingLogin: true })
   },
 
   async login () {
-    const userLoginResult = await this._loginAsUser()
+    return this._authorize({ useExistingLogin: false })
+  },
+
+  async _authorize ({ useExistingLogin }) {
+    const userLoginResult = await this._loginAsUser(useExistingLogin)
+
     const result = {
       status: userLoginResult.status,
       accessToken: null,
       pageId: null
     }
 
-    //
-    //if (userLoginResult.status === constants.facebookLoginStatuses.SUCCESS) {
-    //  // TODO: store token as a service state for future use
-    //  const longTermAccessToken = await this._getLongTermAccessToken(userLoginResult.accessToken)
-    //
-    //  // TODO: split auth logic and page id retrieval, move them out of the sdk wrapper to higher-level services
-    //  const pageId = await this._retrievePageId(longTermAccessToken);
-    //
-    //  result.accessToken = longTermAccessToken
-    //  result.pageId = pageId
-    //}
+    if (userLoginResult.status === constants.facebookLoginStatuses.SUCCESS) {
+      console.log('>>>> facebookSdk.js#_authorize()\t - userLoginResult: ', userLoginResult);
+      // TODO: store token as a service state for future use
+      const shortTermAccessToken = userLoginResult.authResponse.accessToken;
+      const longTermTokenResponse = await this._getLongTermAccessToken(shortTermAccessToken)
+
+      const longTermTokenResult = JSON.parse(longTermTokenResponse.body)
+      const longTermAcessToken = longTermTokenResult.access_token
+      console.log('>>>> facebookSdk.js#_authorize()\t - retrieved long term one from server: ', longTermAcessToken, longTermTokenResult);
+      window.LTR = longTermTokenResult
+
+      result.accessToken = longTermAcessToken
+    }
 
     return result
   },
 
-  _loginAsUser() {
+  _loginAsUser (useExistingLogin) {
+    const authMethodName = useExistingLogin
+      ? 'getLoginStatus'
+      : 'login'
+
     return new Promise(function (resolve) {
-      FB.login(function (status) {
+      FB[authMethodName](function (status) {
         resolve(status)
       }, LOGIN_OPTIONS)
     })
   },
 
-  _getLongTermAccessToken(shortTermAccessToken) {
-    return new Promise((resolve) => {
-      taistApiSingleton.get().proxy
-    })
-  }
+  _getLongTermAccessToken (shortTermAccessToken) {
+    // TODO: split retrieval of auth token and pageId
+    return appServerApi.get(`${constants.longTermAccessTokenEndpoint}/${shortTermAccessToken}`)
+  },
 }
 
 const SDK_OPTIONS = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import constants from '../constants';
+import constants from '../../../shared/constants';
 import facebookSdk from "../services/facebookSdk";
 
 import taistApiSingleton from '../../taistApiSingleton';
@@ -12,7 +12,7 @@ export default class IntegrationSettings extends React.Component {
     this.state = {
       settingsData: null,
       fetchingSettings: false,
-      facebookLoginStatuses: null,
+      facebookLoginStatus: null,
     };
   }
 
@@ -21,9 +21,9 @@ export default class IntegrationSettings extends React.Component {
   }
 
   render () {
+    console.log('>>>> IntegrationSettings.js#render()\t - !!!!!!!: ', this.state);
     if (this._isStateStable()) {
       if (this._integrationIsSet() || this._isFacebookLoggedIn()) {
-        //console.log('>>>> IntegrationSettings.js#render()\t - rendering ui: ', this.state, this._isFacebookLoggedIn());
         return this._renderSettingsUI();
       }
 
@@ -39,13 +39,12 @@ export default class IntegrationSettings extends React.Component {
   }
 
   _isStateStable () {
-    return !this.state.fetchingSettings && this._isFacebookLoginChecked()
+    return !this.state.fetchingSettings && !this.state.loggingIntoFacebook
   }
 
   async _fetchInitialData () {
     await this._fetchIntegrationSettings();
 
-    //console.log('>>>> IntegrationSettings.js#_fetchInitialData()\t - fetched settings: ', this._integrationIsSet());
     if (!this._integrationIsSet()) {
       if (!this._isFacebookLoginChecked()) {
         await this._checkFacebookLogin();
@@ -54,7 +53,12 @@ export default class IntegrationSettings extends React.Component {
   }
 
   _renderSettingsUI () {
-    return <h1>Settings be here!</h1>;
+    // TODO: allow user to set an api access token to use
+    return <div>
+      <h3>Facebook integration settings:</h3>
+      <span>Nimble API access token: {stubNimbleApiAccessToken}</span>
+      <br/>
+    </div>;
   }
 
   _renderFacebookLogin () {
@@ -66,6 +70,7 @@ export default class IntegrationSettings extends React.Component {
   }
 
   async _loginToFacebook () {
+    this.setState({ loggingIntoFacebook: true})
     const loginResult = await facebookSdk.login()
     this._onLoginAttemptFinish(loginResult)
   }
@@ -74,20 +79,26 @@ export default class IntegrationSettings extends React.Component {
     const loginStatus = loginResult.status;
 
     this.setState({
-      facebookLoginStatuses: loginStatus,
+      facebookLoginStatus: loginStatus,
     });
 
-    if (loginStatus === constants.facebookLoginStatuses.SUCCESS) {
+    if (loginStatus === constants.facebookLoginStatus.SUCCESS) {
+      // TODO: render UI to choose available page to use
+      const pageId = constants.stubFacebookPageId
+
       const updatedIntegrationSettings = Object.assign({}, this.state.settingsData, {
-        [constants.facebookPageIdKeyInSettings]: loginResult.pageId,
+        [constants.facebookPageIdKeyInSettings]: pageId,
         [constants.facebookAccessTokenKeyInSettings]: loginResult.accessToken
       });
+
+      console.log('>>>> IntegrationSettings.js#_onLoginAttemptFinish()\t - updating integration settings: ', updatedIntegrationSettings);
 
       return new Promise((resolve) => {
         // TODO: update SDK to enable partial change to avoid possible overwrite of conflicting changes
         taistApiSingleton.get().companyData.set(constants.integrationSettingsKey, updatedIntegrationSettings, (error) => {
           // TODO: consider refetching settings instead of manual update
           this.setState({ settingsData: updatedIntegrationSettings});
+          this.setState({ loggingIntoFacebook: false })
           resolve()
         });
       })
@@ -110,19 +121,23 @@ export default class IntegrationSettings extends React.Component {
   }
 
   async _checkFacebookLogin () {
-      const loginResult = await facebookSdk.checkLogin();
+    this.setState({ loggingIntoFacebook: true })
+    const loginResult = await facebookSdk.checkLogin();
       this._onLoginAttemptFinish(loginResult)
   }
 
   _integrationIsSet () {
-    return this.state.settingsData && this.state.settingsData[constants.facebookPageIdKeyInSettings];
+    let settingsData = this.state.settingsData;
+    return settingsData && settingsData[constants.facebookPageIdKeyInSettings] && settingsData[constants.facebookAccessTokenKeyInSettings];
   }
 
   _isFacebookLoginChecked () {
-    return !!this.state.facebookLoginStatuses;
+    return !!this.state.facebookLoginStatus;
   }
 
   _isFacebookLoggedIn () {
-    return this.state.facebookLoginStatuses === constants.facebookLoginStatuses.SUCCESS;
+    return this.state.facebookLoginStatus === constants.facebookLoginStatuses.SUCCESS;
   }
 }
+
+const stubNimbleApiAccessToken = 'm5yWTtuLy1clR9RQVBBbuz0fES2nBD'
