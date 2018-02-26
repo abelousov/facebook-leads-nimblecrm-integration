@@ -1,0 +1,17 @@
+{
+  "name": "facebook-leads-nimblecrm-integration",
+  "version": "0.1.0",
+  "description": "ntegration of Facebook Lead Ads and NimbleCRM",
+  "main": "index.js",
+  "scripts": {
+    "start": "node fb_app_server/index.js"
+  },
+  "dependencies": {
+    "body-parser": "~1.15.0",
+    "express": "~4.13.3",
+    "express-x-hub": "^1.0.4"
+  },
+  "engines": {
+    "node": "0.12.7"
+  }
+}
