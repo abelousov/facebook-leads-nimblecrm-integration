@@ -37,14 +37,13 @@ export default {
     }
 
     if (userLoginResult.status === constants.facebookLoginStatuses.SUCCESS) {
-      console.log('>>>> facebookSdk.js#_authorize()\t - userLoginResult: ', userLoginResult);
       // TODO: store token as a service state for future use
       const shortTermAccessToken = userLoginResult.authResponse.accessToken;
       const longTermTokenResponse = await this._getLongTermAccessToken(shortTermAccessToken)
 
+      // TODO: return json from server
       const longTermTokenResult = JSON.parse(longTermTokenResponse.body)
-      const longTermAcessToken = longTermTokenResult.access_token
-      console.log('>>>> facebookSdk.js#_authorize()\t - retrieved long term one from server: ', longTermAcessToken, longTermTokenResult);
+      const longTermAcessToken = longTermTokenResult.access_token;
       window.LTR = longTermTokenResult
 
       result.accessToken = longTermAcessToken

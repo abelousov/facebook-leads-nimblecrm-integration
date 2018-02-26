@@ -21,11 +21,6 @@ export default class IntegrationSettings extends React.Component {
   }
 
   render () {
-    console.log('>>>> IntegrationSettings.js#render()\t - !!!!!!!: ', this.state,
-      this._isStateStable(),
-      this._isIntegrationSet(),
-      this._isFacebookLoggedIn());
-
     if (this._isStateStable()) {
       if (this._isIntegrationSet() || this._isFacebookLoggedIn()) {
         return this._renderSettingsUI();
@@ -98,8 +93,6 @@ export default class IntegrationSettings extends React.Component {
         [constants.nimbleAccessTokenKeyInSettings]: stubNimbleApiAccessToken,
       });
 
-      console.log('>>>> IntegrationSettings.js#_onLoginAttemptFinish()\t - updating integration settings: ', updatedIntegrationSettings);
-
       return new Promise((resolve) => {
         // TODO: update SDK to enable partial change to avoid possible overwrite of conflicting changes
         taistApiSingleton.get().companyData.set(constants.integrationSettingsKey, updatedIntegrationSettings, (error) => {
@@ -118,7 +111,7 @@ export default class IntegrationSettings extends React.Component {
     // or convert to promises locally
     return new Promise((resolve) => {
       taistApiSingleton.get().companyData.get(constants.integrationSettingsKey, (error, settingsData) => {
-        console.log('>>>> IntegrationSettings.js#received settings data()\t - : ', { settingsData, error });
+
         // TODO: improve handling of †he default value
         this.setState({ fetchingSettings: false, settingsData: settingsData || {} });
         resolve()
