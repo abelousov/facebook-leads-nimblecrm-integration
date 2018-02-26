@@ -33,9 +33,10 @@
   },
   "dependencies": {
     "body-parser": "~1.15.0",
+    "cross-env": "5.1.2",
     "express": "~4.13.3",
     "express-x-hub": "^1.0.4",
-    "cross-env": "5.1.2",
+    "jquery": "^3.3.1",
     "react": "16.2.0",
     "react-dom": "16.2.0",
     "react-hot-loader": "4.0.0-rc.0",

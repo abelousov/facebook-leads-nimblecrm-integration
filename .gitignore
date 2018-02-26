@@ -57,3 +57,5 @@ typings/
 # dotenv environment variables file
 .env
 
+#Taist addon build
+taist_addon/dist/build

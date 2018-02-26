@@ -1,9 +1,6 @@
 const { resolve } = require('path');
 
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const OpenBrowserPlugin = require('open-browser-webpack-plugin');
 
 const config = {
   devtool: 'cheap-module-eval-source-map',
@@ -12,7 +9,7 @@ const config = {
     'react-hot-loader/patch',
     'webpack-dev-server/client?http://localhost:8080',
     'webpack/hot/only-dev-server',
-    './main.js',
+    './index.js',
     './assets/scss/main.scss',
   ],
 
@@ -22,7 +19,7 @@ const config = {
     publicPath: '',
   },
 
-  context: resolve(__dirname, 'app'),
+  context: resolve(__dirname, '.'),
 
   devServer: {
     hot: true,
@@ -48,19 +45,16 @@ const config = {
       {
         test: /\.scss$/,
         exclude: /node_modules/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: [
-            'css-loader',
-            {
-              loader: 'sass-loader',
-              query: {
-                sourceMap: false,
-              },
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            query: {
+              sourceMap: false,
             },
-          ],
-          publicPath: '../'
-        }),
+          },
+        ],
       },
       {
         test: /\.(png|jpg|gif)$/,
@@ -139,9 +133,6 @@ const config = {
       },
     }),
     new webpack.optimize.ModuleConcatenationPlugin(),
-    new ExtractTextPlugin({ filename: './styles/style.css', disable: false, allChunks: true }),
-    new CopyWebpackPlugin([{ from: 'vendors', to: 'vendors' }]),
-    new OpenBrowserPlugin({ url: 'http://localhost:8080' }),
     new webpack.HotModuleReplacementPlugin(),
   ],
 };
