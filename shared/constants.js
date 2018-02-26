@@ -1,7 +1,8 @@
 module.exports = {
-  integrationSettingsKey: 'facebookIntegrationSettings',
+  integrationSettingsKey: 'allIntegrationSettings',
   facebookPageIdKeyInSettings: 'facebookPageId',
-  facebookAccessTokenKeyInSettings: 'accessToken',
+  facebookAccessTokenKeyInSettings: 'facebookAccessToken',
+  nimbleAccessTokenKeyInSettings: 'nimbleAccessToken',
   facebookAppId: '353235065155542',
   facebookLoginStatuses: {
     SUCCESS: 'connected'

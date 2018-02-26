@@ -21,9 +21,13 @@ export default class IntegrationSettings extends React.Component {
   }
 
   render () {
-    console.log('>>>> IntegrationSettings.js#render()\t - !!!!!!!: ', this.state);
+    console.log('>>>> IntegrationSettings.js#render()\t - !!!!!!!: ', this.state,
+      this._isStateStable(),
+      this._isIntegrationSet(),
+      this._isFacebookLoggedIn());
+
     if (this._isStateStable()) {
-      if (this._integrationIsSet() || this._isFacebookLoggedIn()) {
+      if (this._isIntegrationSet() || this._isFacebookLoggedIn()) {
         return this._renderSettingsUI();
       }
 
@@ -45,7 +49,7 @@ export default class IntegrationSettings extends React.Component {
   async _fetchInitialData () {
     await this._fetchIntegrationSettings();
 
-    if (!this._integrationIsSet()) {
+    if (!this._isIntegrationSet()) {
       if (!this._isFacebookLoginChecked()) {
         await this._checkFacebookLogin();
       }
@@ -56,7 +60,7 @@ export default class IntegrationSettings extends React.Component {
     // TODO: allow user to set an api access token to use
     return <div>
       <h3>Facebook integration settings:</h3>
-      <span>Nimble API access token: {stubNimbleApiAccessToken}</span>
+      <span>Nimble API access token: {this.state.settingsData[constants.nimbleAccessTokenKeyInSettings]}</span>
       <br/>
     </div>;
   }
@@ -80,15 +84,18 @@ export default class IntegrationSettings extends React.Component {
 
     this.setState({
       facebookLoginStatus: loginStatus,
+      loggingIntoFacebook: false
     });
 
-    if (loginStatus === constants.facebookLoginStatus.SUCCESS) {
+    if (loginStatus === constants.facebookLoginStatuses.SUCCESS) {
       // TODO: render UI to choose available page to use
       const pageId = constants.stubFacebookPageId
 
+      // TODO: render UI to set and store nimble api access token
       const updatedIntegrationSettings = Object.assign({}, this.state.settingsData, {
         [constants.facebookPageIdKeyInSettings]: pageId,
-        [constants.facebookAccessTokenKeyInSettings]: loginResult.accessToken
+        [constants.facebookAccessTokenKeyInSettings]: loginResult.accessToken,
+        [constants.nimbleAccessTokenKeyInSettings]: stubNimbleApiAccessToken,
       });
 
       console.log('>>>> IntegrationSettings.js#_onLoginAttemptFinish()\t - updating integration settings: ', updatedIntegrationSettings);
@@ -98,7 +105,6 @@ export default class IntegrationSettings extends React.Component {
         taistApiSingleton.get().companyData.set(constants.integrationSettingsKey, updatedIntegrationSettings, (error) => {
           // TODO: consider refetching settings instead of manual update
           this.setState({ settingsData: updatedIntegrationSettings});
-          this.setState({ loggingIntoFacebook: false })
           resolve()
         });
       })
@@ -126,7 +132,7 @@ export default class IntegrationSettings extends React.Component {
       this._onLoginAttemptFinish(loginResult)
   }
 
-  _integrationIsSet () {
+  _isIntegrationSet () {
     let settingsData = this.state.settingsData;
     return settingsData && settingsData[constants.facebookPageIdKeyInSettings] && settingsData[constants.facebookAccessTokenKeyInSettings];
   }
