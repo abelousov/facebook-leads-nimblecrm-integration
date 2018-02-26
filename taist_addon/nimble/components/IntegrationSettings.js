@@ -8,9 +8,11 @@ import taistApiSingleton from '../../taistApiSingleton';
 export default class IntegrationSettings extends React.Component {
   constructor (props) {
     super(props);
+
     this.state = {
-      settingsFetched: false,
-      facebookConnected: false,
+      settingsData: null,
+      fetchingSettings: false,
+      facebookLoginStatuses: null,
     };
   }
 
@@ -19,10 +21,9 @@ export default class IntegrationSettings extends React.Component {
   }
 
   render () {
-    console.log('>>>>>>>>>>> IntegrationSettings.js#render()\t - state: ', this.state);
-
     if (this._isStateStable()) {
-      if (this._integrationIsSet() || this._facebookLoggedIn()) {
+      if (this._integrationIsSet() || this._isFacebookLoggedIn()) {
+        //console.log('>>>> IntegrationSettings.js#render()\t - rendering ui: ', this.state, this._isFacebookLoggedIn());
         return this._renderSettingsUI();
       }
 
@@ -38,17 +39,15 @@ export default class IntegrationSettings extends React.Component {
   }
 
   _isStateStable () {
-    return this.state.settingsFetched && this._facebookLoginChecked()
+    return !this.state.fetchingSettings && this._isFacebookLoginChecked()
   }
 
   async _fetchInitialData () {
-    //async componentDidUpdate() {
-    console.log('>>>> IntegrationSettings.js#componentDidMount()\t - did mount: ',);
     await this._fetchIntegrationSettings();
 
-    console.log('>>>> IntegrationSettings.js#_fetchInitialData()\t - fetched settings: ', this._integrationIsSet());
+    //console.log('>>>> IntegrationSettings.js#_fetchInitialData()\t - fetched settings: ', this._integrationIsSet());
     if (!this._integrationIsSet()) {
-      if (!this._facebookLoginChecked()) {
+      if (!this._isFacebookLoginChecked()) {
         await this._checkFacebookLogin();
       }
     }
@@ -72,51 +71,58 @@ export default class IntegrationSettings extends React.Component {
   }
 
   _onLoginAttemptFinish(loginResult) {
-    console.log('>>>> IntegrationSettings.js#_checkFacebookLogin()\t - fb login status: ', loginResult);
+    const loginStatus = loginResult.status;
+
     this.setState({
-      facebookLoginStatus: loginResult.status,
+      facebookLoginStatuses: loginStatus,
     });
+
+    if (loginStatus === constants.facebookLoginStatuses.SUCCESS) {
+      const updatedIntegrationSettings = Object.assign({}, this.state.settingsData, {
+        [constants.facebookPageIdKeyInSettings]: loginResult.pageId,
+        [constants.facebookAccessTokenKeyInSettings]: loginResult.accessToken
+      });
+
+      return new Promise((resolve) => {
+        // TODO: update SDK to enable partial change to avoid possible overwrite of conflicting changes
+        taistApiSingleton.get().companyData.set(constants.integrationSettingsKey, updatedIntegrationSettings, (error) => {
+          // TODO: consider refetching settings instead of manual update
+          this.setState({ settingsData: updatedIntegrationSettings});
+          resolve()
+        });
+      })
+    }
   }
 
   async _fetchIntegrationSettings () {
-    this.setState({ settingsFetched: false });
-
-    console.log('>>>> IntegrationSettings.js#_fetchIntegrationS   ettings()\t - fetching data: ', constants, this.props.dataApi);
+    this.setState({ fetchingSettings: true });
 
     // TODO: update SDK to promise-based version
     // or convert to promises locally
     return new Promise((resolve) => {
       taistApiSingleton.get().companyData.get(constants.integrationSettingsKey, (error, settingsData) => {
         console.log('>>>> IntegrationSettings.js#received settings data()\t - : ', { settingsData, error });
-        this.setState({ settingsFetched: true, settingsData });
+        // TODO: improve handling of †he default value
+        this.setState({ fetchingSettings: false, settingsData: settingsData || {} });
+        resolve()
       });
-
-      resolve();
     });
   }
 
   async _checkFacebookLogin () {
-    console.log('>>>> IntegrationSettings.js#_fetchInitialData()\t - checking FB login');
-
-    try {
       const loginResult = await facebookSdk.checkLogin();
       this._onLoginAttemptFinish(loginResult)
-    }
-
-    catch (error) {
-      console.log('>>>> IntegrationSettings.js#_checkFacebookLogin()\t - ERROR while checking login: ', error);
-    }
   }
 
   _integrationIsSet () {
     return this.state.settingsData && this.state.settingsData[constants.facebookPageIdKeyInSettings];
   }
 
-  _facebookLoginChecked () {
-    return !!this.state.facebookLoginStatus;
+  _isFacebookLoginChecked () {
+    return !!this.state.facebookLoginStatuses;
   }
 
-  _facebookLoggedIn () {
-    return this.state.facebookLoginStatus === 'connected';
+  _isFacebookLoggedIn () {
+    return this.state.facebookLoginStatuses === constants.facebookLoginStatuses.SUCCESS;
   }
 }
