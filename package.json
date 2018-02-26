@@ -2,9 +2,8 @@
   "name": "facebook-leads-nimblecrm-integration",
   "version": "0.1.0",
   "description": "ntegration of Facebook Lead Ads and NimbleCRM",
-  "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --config taist_addon/webpack.production.config.js",
+    "start": "webpack --watch --config taist_addon/webpack.config.js",
     "clean": "rimraf dist",
     "production": "cross-env npm run clean && webpack --config taist_addon/webpack.production.config.js --progress --profile --colors",
     "lint": "eslint ./app/**/**.js",

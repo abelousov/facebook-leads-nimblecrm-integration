@@ -6,8 +6,10 @@ export default {
   },
 
   _setRoutes (taistApi) {
-    for (let hashRegexp of this._getRouteProcessorsByUrlHashes()) {
-      const routeProcessor = routeProcessorsByHashes[hashRegexp];
+    let routeProcessorsByUrlHashes = this._getRouteProcessorsByUrlHashes();
+
+    for (let hashRegexp in routeProcessorsByUrlHashes) {
+      const routeProcessor = routeProcessorsByUrlHashes[hashRegexp];
       taistApi.hash.when(hashRegexp, routeProcessor);
     }
   },

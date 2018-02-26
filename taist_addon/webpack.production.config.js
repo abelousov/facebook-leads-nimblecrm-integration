@@ -4,10 +4,7 @@ const webpack = require('webpack');
 const config = {
   devtool: 'cheap-module-source-map',
 
-  entry: [
-    './index.js',
-    './assets/scss/main.scss',
-  ],
+  entry: './index.js',
 
   context: resolve(__dirname, '.'),
 

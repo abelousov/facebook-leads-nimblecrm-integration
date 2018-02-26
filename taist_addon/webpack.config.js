@@ -5,18 +5,16 @@ const webpack = require('webpack');
 const config = {
   devtool: 'cheap-module-eval-source-map',
 
-  entry: [
-    'react-hot-loader/patch',
-    'webpack-dev-server/client?http://localhost:8080',
-    'webpack/hot/only-dev-server',
-    './index.js',
-    './assets/scss/main.scss',
-  ],
+  entry: './index.js',
 
   output: {
     filename: 'addon.js',
     path: resolve(__dirname, 'dist/build'),
     publicPath: '',
+    library: "Addon",
+    libraryTarget: "assign",
+    libraryExport: 'default',
+
   },
 
   context: resolve(__dirname, '.'),
@@ -132,8 +130,6 @@ const config = {
         }
       },
     }),
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
   ],
 };
 
