@@ -44,7 +44,7 @@ app.post(facebookWebhookEndpointPath, function (req, res) {
     return;
   }
 
-  const result = JSON.parse(req.body);
+  const result = req.body;
 
   console.log('>>>> index.js#processing entry()\t - : ', JSON.stringify(result.entry, null, 2));
   result.entry.forEach((leadEntry) => {
