@@ -9,9 +9,6 @@ const path = require('path');
 const constants = require('../shared/constants');
 const externalApis = require('./externalApis');
 
-app.set('port', (process.env.PORT || 5000));
-app.listen(app.get('port'));
-
 const appSecret = process.env.FACEBOOK_APP_SECRET;
 
 app.use(xhub({ algorithm: 'sha1', secret: appSecret }));
@@ -102,6 +99,5 @@ app.get(`${constants.longTermAccessTokenEndpoint}/:shortTermToken`, async functi
   }
 });
 
-app.use('/', express.static(path.join(__dirname, 'public')));
+app.listen(process.env.PORT || 5000);
 
-app.listen();
