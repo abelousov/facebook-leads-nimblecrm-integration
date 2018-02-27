@@ -17,7 +17,7 @@ const fullFacebookLoginRedirectUri = appServerApiRootUrl + constants.facebookLog
 // TODO: split into separate app-specific services
 module.exports = {
   async getFacebookPageCredentials (shortTermToken) {
-    const longLiveUserToken = await _queryFacebookApi('/oauth/access_token', {
+    const longLiveUserTokenResponse = await _queryFacebookApi('/oauth/access_token', {
       fb_exchange_token: shortTermToken,
       client_secret: appSecret,
       client_id: constants.facebookAppId,
@@ -25,12 +25,18 @@ module.exports = {
       redirect_uri: fullFacebookLoginRedirectUri,
     });
 
+    const longLiveUserToken = longLiveUserTokenResponse.access_token
+
+    console.log('>>>> externalApis.js#getFacebookPageCredentials()\t - retrieved long live user token: ', longLiveUserToken);
+
     const pagesData = await _queryFacebookApi('/me/accounts', {
       access_token: longLiveUserToken
     })
 
+    console.log('>>>> externalApis.js#getFacebookPageCredentials()\t - retrieved pages data: ', pagesData);
+
     // TODO: let user choose what pages to subscribe to
-    const firstPage = pagesData[0]
+    const firstPage = pagesData.data[0]
 
     const accessToken = firstPage.access_token
     const pageId = firstPage.id
@@ -39,6 +45,7 @@ module.exports = {
     // TODO: don't subscribe multiple times
     await _queryFacebookApi(`/${pageId}/subscribed_apps`, {access_token: accessToken}, 'POST')
 
+    console.log('>>>> externalApis.js#getFacebookPageCredentials()\t - subscribed to the page: ', pageId);
     return {accessToken, pageId}
   },
 
@@ -79,7 +86,7 @@ function _queryFacebookApi (path, params, method) {
   return _queryRemoteApi(facebookApiRoot, path, params, method);
 }
 
-function _queryRemoteApi (rootUrl, path, params, method = 'GET') {
+async function _queryRemoteApi (rootUrl, path, params, method = 'GET') {
   let url = rootUrl + path;
 
   const shouldPathParamsInUrl = method === 'GET'
@@ -93,5 +100,14 @@ function _queryRemoteApi (rootUrl, path, params, method = 'GET') {
     json: true
   };
 
-  return request(requestOptions);
+  console.log('>>>> externalApis.js#_queryRemoteApi()\t - senging request: ', requestOptions);
+
+  try {
+    return await request(requestOptions);
+  }
+  catch (error) {
+    console.log('>>>> externalApis.js#_queryRemoteApi()\t - error in request: ', error, requestOptions.uri);
+
+    throw error
+  }
 }
