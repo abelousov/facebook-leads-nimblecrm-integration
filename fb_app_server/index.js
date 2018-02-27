@@ -21,7 +21,6 @@ const verificationToken = process.env.FACEBOOK_WEBHOOK_VERIFICATION_TOKEN;
 const receivedUpdates = [];
 
 app.get('/debug', function (req, res) {
-  console.log(req);
   res.send('<pre>' + JSON.stringify(receivedUpdates, null, 2) + '</pre>');
 });
 
@@ -43,8 +42,6 @@ app.get(facebookWebhookEndpointPath, function (req, res) {
 });
 
 app.post(facebookWebhookEndpointPath, function (req, res) {
-  console.log('Facebook request body:', req.body);
-
   if (!req.isXHubValid()) {
     res.sendStatus(401);
     return;
@@ -97,8 +94,6 @@ app.get(`${constants.longTermAccessTokenEndpoint}/:shortTermToken`, async functi
 
   try {
     const longTermToken = await externalApis.getLongTermFacebookToken(shortTermToken);
-
-    console.log('>>>> index.js#retrieved verificationToken()\t - : ', longTermToken);
     res.send(longTermToken);
   }
   catch (error) {
