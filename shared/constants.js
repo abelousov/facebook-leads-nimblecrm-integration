@@ -8,6 +8,8 @@ module.exports = {
     SUCCESS: 'connected'
   },
 
+  facebookLoginCallbackPath: '/loginCallback',
+
   // TODO: use environment variables here:
   // environments should not depend on webpack build targets (dev/production),
   // so that a development version could be build that uses production config
