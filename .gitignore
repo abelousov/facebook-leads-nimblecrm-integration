@@ -58,4 +58,4 @@ typings/
 .env
 
 #Taist addon build
-taist_addon/dist/build
+taist_addon/dist/build/*.js.map
