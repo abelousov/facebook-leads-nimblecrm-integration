@@ -14,6 +14,8 @@ const taistApiRoot = 'https://www.tai.st/api/0.2/addonApi';
 const appServerApiRootUrl = 'http://localhost:5000';
 const fullFacebookLoginRedirectUri = appServerApiRootUrl + constants.facebookLoginCallbackPath;
 
+const nimbleApiRoot = 'https://api.nimble.com/api/v1'
+
 // TODO: split into separate app-specific services
 module.exports = {
   async getFacebookPageCredentials (shortTermToken) {
@@ -57,7 +59,12 @@ module.exports = {
   },
 
   pushLeadToNimble ({ accessToken, lead }) {
-    return _queryNimbleApi()
+    return _queryNimbleApi('/contact', {
+      record_type: 'person',
+      fields: {
+
+      }
+    }, 'POST')
   },
 
   getFacebookLeadInfo ({ accessToken, leadId }) {
@@ -84,6 +91,10 @@ function _queryTaistAddonApi (path, params, method) {
 
 function _queryFacebookApi (path, params, method) {
   return _queryRemoteApi(facebookApiRoot, path, params, method);
+}
+
+function _queryNimbleApi (path, params, method) {
+  return _queryRemoteApi(nimbleApiRoot, path, params, method);
 }
 
 async function _queryRemoteApi (rootUrl, path, params, method = 'GET') {
