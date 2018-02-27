@@ -8,7 +8,7 @@ const appSecret = process.env.FACEBOOK_APP_SECRET;
 const facebookApiRoot = 'https://graph.facebook.com/v2.12';
 
 // TODO: extract into Taist server-side SDK
-const taistApiRoot = 'https://www.tai.st/api/0.2/addonApi/';
+const taistApiRoot = 'https://www.tai.st/api/0.2/addonApi';
 
 // TODO: account for production as well, retrieve dynamically
 const appServerApiRootUrl = 'http://localhost:5000';
