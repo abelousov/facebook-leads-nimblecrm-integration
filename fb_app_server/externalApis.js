@@ -61,7 +61,7 @@ module.exports = {
   },
 
   getFacebookLeadInfo ({ accessToken, leadId }) {
-    return _queryFacebookApi()
+    return _queryFacebookApi(`/${leadId}`, {accessToken})
   },
 
   getTaistCompanyIdByPageId (pageId) {

@@ -76,10 +76,14 @@ async function pushLead ({ id, formId, pageId }) {
   pushProgress.taistCompanyId = taistCompanyId
   pushProgress.integrationSettings = integrationSettings
 
+  let facebookPageAccessToken = integrationSettings[constants.facebookAccessTokenKeyInSettings];
+
   const lead = await externalApis.getFacebookLeadInfo({
-    accessToken: integrationSettings[constants.facebookAccessTokenKeyInSettings],
+    accessToken: facebookPageAccessToken,
     leadId: id,
   });
+
+  pushProgress.lead = lead
 
   //TODO: associate forms with campaigns or some custom field
   await externalApis.pushLeadToNimble({
