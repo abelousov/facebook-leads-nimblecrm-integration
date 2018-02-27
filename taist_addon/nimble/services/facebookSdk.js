@@ -42,7 +42,7 @@ export default {
       const pageInfo = await this._getPageInfo(shortTermAccessToken)
 
       result.accessToken = pageInfo.accessToken
-      result.pageId = accessToken.pageId
+      result.pageId = pageInfo.pageId
     }
 
     return result
@@ -63,7 +63,7 @@ export default {
   async _getPageInfo (shortTermAccessToken) {
     const response = await appServerApi.get(`${constants.pageCredentialsEndpoint}/${shortTermAccessToken}`)
 
-    return response.result.access_token
+    return response.result
   },
 }
 
