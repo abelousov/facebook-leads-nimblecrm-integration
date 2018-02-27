@@ -47,14 +47,15 @@ app.post(facebookWebhookEndpointPath, function (req, res) {
   const result = req.body;
 
   console.log('>>>> index.js#processing entry()\t - : ', JSON.stringify(result.entry, null, 2));
-  result.entry.forEach((leadEntry) => {
-    const firstChange = leadEntry.changes[0];
-
-    pushLead({
-      id: leadEntry.id,
-      formId: firstChange.value.form_id,
-      pageId: firstChange.value.page_id,
-    });
+  result.entry.forEach((pageEntry) => {
+    pageEntry.changes.forEach((leadChange) => {
+      const leadInfo = leadChange.value
+      pushLead({
+        id: leadInfo.leadgen_id,
+        formId: leadInfo.form_id,
+        pageId: leadInfo.page_id,
+      });
+    })
   });
   res.sendStatus(200);
 });
@@ -64,7 +65,8 @@ app.get(constants.facebookLoginCallbackPath, function (req, res) {
 });
 
 async function pushLead ({ id, formId, pageId }) {
-  const pushProgress = {}
+  const pushProgress = { id, formId, pageId }
+
   receivedUpdates.unshift(pushProgress)
 
   const taistCompanyId = await externalApis.getTaistCompanyIdByPageId(pageId);
