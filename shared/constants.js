@@ -17,7 +17,5 @@ module.exports = {
   //appServerRootUrl: 'https://facebook-leads-nimblecrm.herokuapp.com',
   appServerRootUrl: 'localhost:5000',
 
-  longTermAccessTokenEndpoint: '/requestLongTermAccessToken',
-
-  stubFacebookPageId: '302533069820881',
+  pageCredentialsEndpoint: '/facebookPageCredentials',
 }

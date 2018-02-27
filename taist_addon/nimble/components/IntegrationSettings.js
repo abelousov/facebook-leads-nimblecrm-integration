@@ -83,12 +83,9 @@ export default class IntegrationSettings extends React.Component {
     });
 
     if (loginStatus === constants.facebookLoginStatuses.SUCCESS) {
-      // TODO: render UI to choose available page to use
-      const pageId = constants.stubFacebookPageId
-
       // TODO: render UI to set and store nimble api access token
       const updatedIntegrationSettings = Object.assign({}, this.state.settingsData, {
-        [constants.facebookPageIdKeyInSettings]: pageId,
+        [constants.facebookPageIdKeyInSettings]: lpginResult.pageId,
         [constants.facebookAccessTokenKeyInSettings]: loginResult.accessToken,
         [constants.nimbleAccessTokenKeyInSettings]: stubNimbleApiAccessToken,
       });

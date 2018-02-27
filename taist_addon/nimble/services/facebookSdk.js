@@ -39,7 +39,10 @@ export default {
     if (userLoginResult.status === constants.facebookLoginStatuses.SUCCESS) {
       // TODO: store token as a service state for future use
       const shortTermAccessToken = userLoginResult.authResponse.accessToken;
-      result.accessToken = await this._getLongTermAccessToken(shortTermAccessToken)
+      const pageInfo = await this._getPageInfo(shortTermAccessToken)
+
+      result.accessToken = pageInfo.accessToken
+      result.pageId = accessToken.pageId
     }
 
     return result
@@ -57,8 +60,8 @@ export default {
     })
   },
 
-  async _getLongTermAccessToken (shortTermAccessToken) {
-    const response = await appServerApi.get(`${constants.longTermAccessTokenEndpoint}/${shortTermAccessToken}`)
+  async _getPageInfo (shortTermAccessToken) {
+    const response = await appServerApi.get(`${constants.pageCredentialsEndpoint}/${shortTermAccessToken}`)
 
     return response.result.access_token
   },

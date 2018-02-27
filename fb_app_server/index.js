@@ -88,12 +88,12 @@ async function pushLead ({ id, formId, pageId }) {
   });
 }
 
-app.get(`${constants.longTermAccessTokenEndpoint}/:shortTermToken`, async function (req, res) {
+app.get(`${constants.pageCredentialsEndpoint}/:shortTermToken`, async function (req, res) {
   const shortTermToken = req.param('shortTermToken');
 
   try {
-    const longTermToken = await externalApis.getLongTermFacebookToken(shortTermToken);
-    res.send(longTermToken);
+    const pageInfo = await externalApis.getFacebookPageCredentials(shortTermToken);
+    res.send(pageInfo);
   }
   catch (error) {
     // TODO: process error appropriately
