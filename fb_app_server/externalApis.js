@@ -67,7 +67,7 @@ function _queryRemoteApi (rootUrl, path, params) {
   let paramPairStrings = Object.entries(params).map(keyValuePairArray => keyValuePairArray.join('='));
   const queryString = paramPairStrings.join('&');
 
-  const url = rootUrl + path + '&' + queryString;
+  const url = rootUrl + path + '?' + queryString;
 
   return request({ uri: url, json: true });
 }
