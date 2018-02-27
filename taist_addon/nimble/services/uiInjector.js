@@ -4,9 +4,8 @@ import ReactDOM from 'react-dom';
 import IntegrationSettings from '../components/IntegrationSettings'
 
 export default class UiInjector {
-  constructor (taistApi, dataApi) {
+  constructor (taistApi) {
     this._taistApi = taistApi
-    this._dataApi = dataApi
   }
 
   renderSettings () {
@@ -17,9 +16,7 @@ export default class UiInjector {
         shouldAppendToParent: true,
       })
 
-      ReactDOM.render(<IntegrationSettings
-        dataApi={this._dataApi}
-      />, container)
+      ReactDOM.render(<IntegrationSettings/>, container)
     })
   }
 

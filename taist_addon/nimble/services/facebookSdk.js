@@ -39,14 +39,7 @@ export default {
     if (userLoginResult.status === constants.facebookLoginStatuses.SUCCESS) {
       // TODO: store token as a service state for future use
       const shortTermAccessToken = userLoginResult.authResponse.accessToken;
-      const longTermTokenResponse = await this._getLongTermAccessToken(shortTermAccessToken)
-
-      // TODO: return json from server
-      const longTermTokenResult = JSON.parse(longTermTokenResponse.body)
-      const longTermAcessToken = longTermTokenResult.access_token;
-      window.LTR = longTermTokenResult
-
-      result.accessToken = longTermAcessToken
+      result.accessToken = await this._getLongTermAccessToken(shortTermAccessToken)
     }
 
     return result
@@ -64,9 +57,10 @@ export default {
     })
   },
 
-  _getLongTermAccessToken (shortTermAccessToken) {
-    // TODO: split retrieval of auth token and pageId
-    return appServerApi.get(`${constants.longTermAccessTokenEndpoint}/${shortTermAccessToken}`)
+  async _getLongTermAccessToken (shortTermAccessToken) {
+    const response = await appServerApi.get(`${constants.longTermAccessTokenEndpoint}/${shortTermAccessToken}`)
+
+    return response.result.access_token
   },
 }
 

@@ -2,14 +2,14 @@ import UInjector from './services/uiInjector'
 import facebookSdk from './services/facebookSdk'
 
 export default {
-  async start (taistApi, dataApi) {
-    this._uiInjector = new UInjector(taistApi, dataApi)
+  async start (taistApi) {
+    this._uiInjector = new UInjector(taistApi)
 
     await facebookSdk.init()
     this._setRoutes(taistApi)
   },
 
-  _setRoutes (taistApi, dataApi) {
+  _setRoutes (taistApi) {
     let routeProcessorsByUrlHashes = this._getRouteProcessorsByUrlHashes();
 
     for (let hashRegexp in routeProcessorsByUrlHashes) {
@@ -26,16 +26,3 @@ export default {
     }
   }
 }
-
-//proxy = require('../helpers/xmlHttpProxy');
-
-//function extractNimbleAuthTokenFromRequest () {
-//  return proxy.onRequestFinish(function (request) {
-//    var tokenMatches, url;
-//    url = request.responseURL;
-//    tokenMatches = url.match(/\/api\/sessions\/([0-9abcdef-]{36})\?/);
-//    if (tokenMatches != null) {
-//      return app.options.nimbleToken = tokenMatches[1];
-//    }
-//  });
-//};

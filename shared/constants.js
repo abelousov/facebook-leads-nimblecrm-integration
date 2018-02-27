@@ -1,5 +1,5 @@
 module.exports = {
-  integrationSettingsKey: 'allIntegrationSettings',
+  integrationSettingsKey: 'integrationSettings',
   facebookPageIdKeyInSettings: 'facebookPageId',
   facebookAccessTokenKeyInSettings: 'facebookAccessToken',
   nimbleAccessTokenKeyInSettings: 'nimbleAccessToken',
