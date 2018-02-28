@@ -14,8 +14,6 @@ const taistApiRoot = 'https://www.tai.st/api/0.2/addonApi';
 const appServerApiRootUrl = 'http://localhost:5000';
 const fullFacebookLoginRedirectUri = appServerApiRootUrl + constants.facebookLoginCallbackPath;
 
-const nimbleApiRoot = 'https://api.nimble.com/api/v1'
-
 // TODO: split into separate app-specific services
 module.exports = {
   async getFacebookPageCredentials (shortTermToken) {
@@ -64,7 +62,7 @@ module.exports = {
       fields: {
 
       }
-    }, 'POST')
+    }, 'POST', accessToken)
   },
 
   getFacebookLeadInfo ({ accessToken, leadId }) {
@@ -93,11 +91,14 @@ function _queryFacebookApi (path, params, method) {
   return _queryRemoteApi(facebookApiRoot, path, params, method);
 }
 
-function _queryNimbleApi (path, params, method) {
-  return _queryRemoteApi(constants.nimbleApiRoot, path, params, method);
+// TODO: deduplicate with client-side nimble api wrapper
+function _queryNimbleApi (path, params, method, accessToken) {
+  return _queryRemoteApi(constants.nimbleApiRoot, path, params, method, {
+    "Authorization": "Bearer " + accessToken,
+  });
 }
 
-async function _queryRemoteApi (rootUrl, path, params, method = 'GET') {
+async function _queryRemoteApi (rootUrl, path, params, method = 'GET', headers) {
   let url = rootUrl + path;
 
   const shouldPassParamsInUrl = method === 'GET'
@@ -108,6 +109,7 @@ async function _queryRemoteApi (rootUrl, path, params, method = 'GET') {
     method,
     uri: url,
     [paramsOptionKey]: params,
+    headers,
     json: true
   };
 
