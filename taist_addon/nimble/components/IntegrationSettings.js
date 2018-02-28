@@ -6,104 +6,104 @@ import taistApiSingleton from '../../taistApiSingleton';
 
 // TODO: move all logic out to services
 export default class IntegrationSettings extends React.Component {
-  constructor (props) {
-    super(props);
+  state = {
+    loaded: false,
+    settingsData: null,
+    isLoggedIntoFacebook: false,
+  };
 
-    this.state = {
-      settingsData: null,
-      fetchingSettings: false,
-      facebookLoginStatus: null,
-    };
-  }
-
-  async componentDidMount () {
-    this._fetchInitialData();
+  componentDidMount () {
+    this._load();
   }
 
   render () {
-    if (this._isStateStable()) {
-      if (this._isIntegrationSet() || this._isFacebookLoggedIn()) {
-        return this._renderSettingsUI();
-      }
-
-      else {
-        return this._renderFacebookLogin();
-      }
+    if (this.state.loaded) {
+      return <div>
+        <h3>Facebook integration settings:</h3>
+        <br/>
+        <div>
+          {this.state.isLoggedIntoFacebook ? null : this._renderFacebookLogin()}
+        </div>
+        <div>
+          <form onSubmit={(event) => {
+            this._saveUpdatedSettings();
+            event.preventDefault();
+          }}>
+            <label>
+              Nimble API access token:
+              <input
+                type="text"
+                value={this._getNimbleAccessToken() || ''}
+                onChange={(event) => this._updateSettingsWithoutSave({
+                [constants.nimbleAccessTokenKeyInSettings]: event.target.value
+              })}
+              />
+            </label>
+            <div>
+              <input type="submit" value="Save"/>
+            </div>
+          </form>
+        </div>
+      </div>;
     }
-
     else {
       // TODO: return spinner here
       return null;
     }
   }
 
-  _isStateStable () {
-    return !this.state.fetchingSettings && !this.state.loggingIntoFacebook
+  _getNimbleAccessToken () {
+    return this.state.settingsData[constants.nimbleAccessTokenKeyInSettings];
   }
 
-  async _fetchInitialData () {
+  async _load () {
     await this._fetchIntegrationSettings();
+    await this._checkFacebookLogin();
 
-    if (!this._isIntegrationSet()) {
-      if (!this._isFacebookLoginChecked()) {
-        await this._checkFacebookLogin();
-      }
-    }
-  }
-
-  _renderSettingsUI () {
-    // TODO: allow user to set an api access token to use
-    return <div>
-      <h3>Facebook integration settings:</h3>
-      <span>Nimble API access token: {this.state.settingsData[constants.nimbleAccessTokenKeyInSettings]}</span>
-      <br/>
-    </div>;
+    this.setState({ loaded: true });
   }
 
   _renderFacebookLogin () {
-    return <h2
-      onClick={() => this._loginToFacebook()}
-    >
-      Login to facebook to set up the integration
-    </h2>
+    return facebookSdk.renderFacebookLoginButton({ onLogin: (loginResult) => this._onLoginAttemptFinish(loginResult) });
   }
 
-  async _loginToFacebook () {
-    this.setState({ loggingIntoFacebook: true})
-    const loginResult = await facebookSdk.login()
-    this._onLoginAttemptFinish(loginResult)
-  }
+  async _onLoginAttemptFinish (loginResult) {
+    const loginSucceeded = !!loginResult.accessToken;
 
-  _onLoginAttemptFinish(loginResult) {
-    const loginStatus = loginResult.status;
-
-    this.setState({
-      facebookLoginStatus: loginStatus,
-      loggingIntoFacebook: false
-    });
-
-    if (loginStatus === constants.facebookLoginStatuses.SUCCESS) {
-      // TODO: render UI to set and store nimble api access token
-      const updatedIntegrationSettings = Object.assign({}, this.state.settingsData, {
-        [constants.facebookPageIdKeyInSettings]: loginResult.pageId,
-        [constants.facebookAccessTokenKeyInSettings]: loginResult.accessToken,
-        [constants.nimbleAccessTokenKeyInSettings]: stubNimbleApiAccessToken,
+    if (loginSucceeded) {
+      this.setState({
+        isLoggedIntoFacebook: true,
       });
 
-      return new Promise((resolve) => {
-        // TODO: update SDK to enable partial change to avoid possible overwrite of conflicting changes
-        taistApiSingleton.get().companyData.set(constants.integrationSettingsKey, updatedIntegrationSettings, (error) => {
-          // TODO: consider refetching settings instead of manual update
-          this.setState({ settingsData: updatedIntegrationSettings});
-          resolve()
-        });
-      })
+      const settingsUpdate = Object.assign({}, this.state.settingsData, {
+        [constants.facebookPageIdKeyInSettings]: loginResult.pageId,
+        [constants.facebookAccessTokenKeyInSettings]: loginResult.accessToken,
+      });
+
+      this._updateSettingsWithoutSave(settingsUpdate);
+      await this._saveUpdatedSettings();
     }
   }
 
-  async _fetchIntegrationSettings () {
-    this.setState({ fetchingSettings: true });
+  _updateSettingsWithoutSave (updateHash) {
+    console.log('>>>> IntegrationSettings.js#_updateSettingsWithoutSave()\t - updating settings: ', updateHash);
+    const updatedSettings = Object.assign({}, this.state.settingsData, updateHash);
 
+    this.setState({settingsData: updatedSettings})
+  }
+
+  async _saveUpdatedSettings () {
+    await new Promise((resolve) => {
+      // TODO: update SDK to enable partial change to avoid possible overwrite of conflicting changes
+      taistApiSingleton.get().companyData.set(constants.integrationSettingsKey, this.state.settingsData, (error) => {
+        resolve();
+      });
+    });
+
+    await this._fetchIntegrationSettings();
+  }
+
+  async _fetchIntegrationSettings () {
     // TODO: update SDK to promise-based version
     // or convert to promises locally
     return new Promise((resolve) => {
@@ -111,29 +111,13 @@ export default class IntegrationSettings extends React.Component {
 
         // TODO: improve handling of †he default value
         this.setState({ fetchingSettings: false, settingsData: settingsData || {} });
-        resolve()
+        resolve();
       });
     });
   }
 
   async _checkFacebookLogin () {
-    this.setState({ loggingIntoFacebook: true })
     const loginResult = await facebookSdk.checkLogin();
-      this._onLoginAttemptFinish(loginResult)
-  }
-
-  _isIntegrationSet () {
-    let settingsData = this.state.settingsData;
-    return settingsData && settingsData[constants.facebookPageIdKeyInSettings] && settingsData[constants.facebookAccessTokenKeyInSettings];
-  }
-
-  _isFacebookLoginChecked () {
-    return !!this.state.facebookLoginStatus;
-  }
-
-  _isFacebookLoggedIn () {
-    return this.state.facebookLoginStatus === constants.facebookLoginStatuses.SUCCESS;
+    this._onLoginAttemptFinish(loginResult);
   }
 }
-
-const stubNimbleApiAccessToken = 'm5yWTtuLy1clR9RQVBBbuz0fES2nBD'

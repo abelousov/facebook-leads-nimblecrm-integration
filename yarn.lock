@@ -5603,6 +5603,10 @@ react-dom@16.2.0:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
+react-facebook-login@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/react-facebook-login/-/react-facebook-login-4.0.1.tgz#7d43672ee86e3f2cd9e8758de1e61eb66a212611"
+
 react-hot-loader@4.0.0-rc.0:
   version "4.0.0-rc.0"
   resolved "https://registry.yarnpkg.com/react-hot-loader/-/react-hot-loader-4.0.0-rc.0.tgz#54d931dafeface5119c741d44ccc3e75fbb432e8"
