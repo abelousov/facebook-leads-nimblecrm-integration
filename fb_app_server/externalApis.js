@@ -94,15 +94,15 @@ function _queryFacebookApi (path, params, method) {
 }
 
 function _queryNimbleApi (path, params, method) {
-  return _queryRemoteApi(nimbleApiRoot, path, params, method);
+  return _queryRemoteApi(constants.nimbleApiRoot, path, params, method);
 }
 
 async function _queryRemoteApi (rootUrl, path, params, method = 'GET') {
   let url = rootUrl + path;
 
-  const shouldPathParamsInUrl = method === 'GET'
+  const shouldPassParamsInUrl = method === 'GET'
 
-  const paramsOptionKey = shouldPathParamsInUrl ? 'qs' : 'body'
+  const paramsOptionKey = shouldPassParamsInUrl ? 'qs' : 'body'
 
   const requestOptions = {
     method,
@@ -111,7 +111,7 @@ async function _queryRemoteApi (rootUrl, path, params, method = 'GET') {
     json: true
   };
 
-  console.log('>>>> externalApis.js#_queryRemoteApi()\t - senging request: ', requestOptions);
+  console.log('>>>> externalApis.js#_queryRemoteApi()\t - sending request: ', requestOptions);
 
   try {
     return await request(requestOptions);

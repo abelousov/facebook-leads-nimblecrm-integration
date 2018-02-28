@@ -18,4 +18,10 @@ module.exports = {
   appServerRootUrl: 'localhost:5000',
 
   pageCredentialsEndpoint: '/facebookPageCredentials',
+
+  nimblePipelineIdKeyInSettings: 'nimblePipelineId',
+  nimbleStageIdKeyInSettings: 'nimbleStageId',
+  nimbleResponsibleIdKeyInSettings: 'nimbleResponsibleId',
+
+  nimbleApiRoot: 'https://app.nimble.com/api'
 }

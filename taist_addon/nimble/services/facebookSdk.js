@@ -66,9 +66,7 @@ export default {
   },
 
   async _getPageInfo (shortTermAccessToken) {
-    const response = await appServerApi.get(`${constants.pageCredentialsEndpoint}/${shortTermAccessToken}`);
-
-    return response.result;
+    return await appServerApi.get(`${constants.pageCredentialsEndpoint}/${shortTermAccessToken}`);
   },
 
   renderFacebookLoginButton ({ onLogin }) {

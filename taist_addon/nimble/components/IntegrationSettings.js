@@ -3,6 +3,9 @@ import constants from '../../../shared/constants';
 import facebookSdk from "../services/facebookSdk";
 
 import taistApiSingleton from '../../taistApiSingleton';
+import SettingsForm from "./SettingsForm";
+
+import nimbleApi from '../services/nimbleApi'
 
 // TODO: move all logic out to services
 export default class IntegrationSettings extends React.Component {
@@ -10,6 +13,7 @@ export default class IntegrationSettings extends React.Component {
     loaded: false,
     settingsData: null,
     isLoggedIntoFacebook: false,
+    nimbleListData: null,
   };
 
   componentDidMount () {
@@ -24,26 +28,11 @@ export default class IntegrationSettings extends React.Component {
         <div>
           {this.state.isLoggedIntoFacebook ? null : this._renderFacebookLogin()}
         </div>
-        <div>
-          <form onSubmit={(event) => {
-            this._saveUpdatedSettings();
-            event.preventDefault();
-          }}>
-            <label>
-              Nimble API access token:
-              <input
-                type="text"
-                value={this._getNimbleAccessToken() || ''}
-                onChange={(event) => this._updateSettingsWithoutSave({
-                [constants.nimbleAccessTokenKeyInSettings]: event.target.value
-              })}
-              />
-            </label>
-            <div>
-              <input type="submit" value="Save"/>
-            </div>
-          </form>
-        </div>
+        <SettingsForm
+          value={this.state.settingsData}
+          nimbleListData={this.state.nimbleListData}
+          onChange={(newSettings => this._saveSettings(newSettings))}
+        />
       </div>;
     }
     else {
@@ -52,12 +41,8 @@ export default class IntegrationSettings extends React.Component {
     }
   }
 
-  _getNimbleAccessToken () {
-    return this.state.settingsData[constants.nimbleAccessTokenKeyInSettings];
-  }
-
   async _load () {
-    await this._fetchIntegrationSettings();
+    await this._reloadIntegrationSettings();
     await this._checkFacebookLogin();
 
     this.setState({ loaded: true });
@@ -80,30 +65,35 @@ export default class IntegrationSettings extends React.Component {
         [constants.facebookAccessTokenKeyInSettings]: loginResult.accessToken,
       });
 
-      this._updateSettingsWithoutSave(settingsUpdate);
-      await this._saveUpdatedSettings();
+      await this._updateSettings(settingsUpdate);
     }
   }
 
-  _updateSettingsWithoutSave (updateHash) {
-    console.log('>>>> IntegrationSettings.js#_updateSettingsWithoutSave()\t - updating settings: ', updateHash);
+  async _updateSettings (updateHash) {
     const updatedSettings = Object.assign({}, this.state.settingsData, updateHash);
 
-    this.setState({settingsData: updatedSettings})
+    await this._saveSettings(updatedSettings);
   }
 
-  async _saveUpdatedSettings () {
+  async _saveSettings (newSettings) {
     await new Promise((resolve) => {
       // TODO: update SDK to enable partial change to avoid possible overwrite of conflicting changes
-      taistApiSingleton.get().companyData.set(constants.integrationSettingsKey, this.state.settingsData, (error) => {
+      taistApiSingleton.get().companyData.set(constants.integrationSettingsKey, newSettings, (error) => {
         resolve();
       });
     });
 
-    await this._fetchIntegrationSettings();
+    await this._reloadIntegrationSettings();
   }
 
-  async _fetchIntegrationSettings () {
+  async _reloadIntegrationSettings () {
+    await this._loadStoredSettings()
+    nimbleApi.useAccessToken(this.state.settingsData[constants.nimbleAccessTokenKeyInSettings])
+
+    await this._reloadNimbleData()
+  }
+
+  async _loadStoredSettings () {
     // TODO: update SDK to promise-based version
     // or convert to promises locally
     return new Promise((resolve) => {
@@ -114,6 +104,18 @@ export default class IntegrationSettings extends React.Component {
         resolve();
       });
     });
+  }
+
+  async _reloadNimbleData () {
+    let nimbleListData = null
+    if (nimbleApi.isAvailable()) {
+      nimbleListData = {
+        pipelines: await nimbleApi.getPipelines(),
+        //users: await nimbleApi.getUsers()
+      }
+    }
+
+    this.setState({nimbleListData})
   }
 
   async _checkFacebookLogin () {
