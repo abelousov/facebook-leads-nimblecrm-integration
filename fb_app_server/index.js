@@ -105,7 +105,7 @@ async function pushLead (leadGenInfo) {
   catch (error) {
     progressTracker.error = error.message
   }
-  console.log('>>>> index.js#pushLead()\t - all progress: ', progressTracker);
+  console.log('>>>> index.js#pushLead()\t - all entry progress: ', progressTracker);
 
 }
 
@@ -124,7 +124,7 @@ app.get(`${constants.pageCredentialsEndpoint}/:shortTermToken`, async function (
 
 app.listen(process.env.PORT || 5000);
 
-// local debug:
+//local debug:
 //_processLeadsEntry([{
 //  "changes": [
 //    {

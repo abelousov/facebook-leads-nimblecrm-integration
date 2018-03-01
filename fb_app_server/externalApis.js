@@ -124,7 +124,7 @@ module.exports = {
 
   createNimbleDealWithContact ({ integrationSettings, nimbleContact, nimblePipeline}) {
     function _getContactField(fieldName) {
-      return nimbleContact.fields[fieldName].value
+      return nimbleContact.fields[fieldName][0].value
     }
 
     const startStage = nimblePipeline.stages[0]

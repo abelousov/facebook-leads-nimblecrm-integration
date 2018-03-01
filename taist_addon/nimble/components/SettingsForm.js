@@ -135,12 +135,3 @@ export default class SettingsForm extends React.Component {
     return this._getCurrentSettings()[settingKey];
   }
 }
-
-const DEFAULT_FIELD_MAPPING = {
-  email: "email",
-  first_name: "first name",
-  last_name: "last name",
-  phone_number: "phone",
-  'lead_gen.form_id': null,
-  'lead_gen.page_id': null,
-}
