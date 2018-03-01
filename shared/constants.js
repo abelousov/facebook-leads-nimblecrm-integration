@@ -23,5 +23,7 @@ module.exports = {
   nimbleStageIdKeyInSettings: 'nimbleStageId',
   nimbleResponsibleIdKeyInSettings: 'nimbleResponsibleId',
 
+  fieldMappingKeyInSettings: 'fieldMapping',
+
   nimbleApiRoot: 'https://app.nimble.com/api/v1'
 }

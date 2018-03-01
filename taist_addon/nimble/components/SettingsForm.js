@@ -19,6 +19,8 @@ export default class SettingsForm extends React.Component {
 
             {/*TODO: fix nimbleAPi.getUsers to use this*/}
             {/*{this._renderSelectInput('Responsible:', constants.nimbleResponsibleIdKeyInSettings, this._getResponsibleOptions())}*/}
+
+            {this._renderJsonInput('Field mapping: ', constants.fieldMappingKeyInSettings, DEFAULT_MAPPING)}
           </div>
           : null
         }
@@ -48,6 +50,17 @@ export default class SettingsForm extends React.Component {
     return this._renderSettingInput({
       caption,
       type: 'text',
+      settingKey,
+      children: null,
+      defaultValue: ''
+    });
+  }
+
+  _renderJsonInput (caption, settingKey) {
+    //TODO: valudate json in place
+    return this._renderSettingInput({
+      caption,
+      type: 'textarea',
       settingKey,
       children: null,
       defaultValue: ''
@@ -88,15 +101,18 @@ export default class SettingsForm extends React.Component {
 
     let tagName;
 
-    const isSelect = type === 'select';
-    if (isSelect) {
-      tagName = 'select';
+    switch (type) {
+      case 'select':
+        tagName = 'select';
+        break;
+      case 'textarea':
+        tagName = 'textarea';
+        break;
+      default:
+        tagName = 'input';
+        props.type = type;
     }
 
-    else {
-      tagName = 'input';
-      props.type = type;
-    }
     return <div>
       <label>
         {caption}
