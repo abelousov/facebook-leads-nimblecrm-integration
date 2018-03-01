@@ -49,12 +49,8 @@ app.post(facebookWebhookEndpointPath, function (req, res) {
   console.log('>>>> index.js#processing entry()\t - : ', JSON.stringify(result.entry, null, 2));
   result.entry.forEach((pageEntry) => {
     pageEntry.changes.forEach((leadChange) => {
-      const leadInfo = leadChange.value
-      pushLead({
-        id: leadInfo.leadgen_id,
-        formId: leadInfo.form_id,
-        pageId: leadInfo.page_id,
-      });
+      const leadGenInfo = leadChange.value
+      pushLead(leadGenInfo);
     })
   });
   res.sendStatus(200);
@@ -64,12 +60,12 @@ app.get(constants.facebookLoginCallbackPath, function (req, res) {
   res.sendStatus(200);
 });
 
-async function pushLead ({ id, formId, pageId }) {
-  const pushProgress = { id, formId, pageId }
+async function pushLead (leadGenInfo) {
+  const pushProgress = Object.assign({}, leadGenInfo)
 
   receivedUpdates.unshift(pushProgress)
 
-  const taistCompanyId = await externalApis.getTaistCompanyIdByPageId(pageId);
+  const taistCompanyId = await externalApis.getTaistCompanyIdByPageId(leadGenInfo.page_id);
 
   const integrationSettings = await externalApis.getIntegrationSettings(taistCompanyId);
 
@@ -78,18 +74,24 @@ async function pushLead ({ id, formId, pageId }) {
 
   let facebookPageAccessToken = integrationSettings[constants.facebookAccessTokenKeyInSettings];
 
-  const lead = await externalApis.getFacebookLeadInfo({
+  const facebookLead = await externalApis.getFacebookLead({
     accessToken: facebookPageAccessToken,
-    leadId: id,
+    leadId: leadGenInfo.leadgen_id,
   });
 
-  pushProgress.lead = lead
+  pushProgress.facebookLead = facebookLead
 
   //TODO: associate forms with campaigns or some custom field
-  await externalApis.pushLeadToNimble({
-    accessToken: integrationSettings[constants.nimbleAccessTokenKeyInSettings],
-    lead,
+  //TODO: restructure settings to pass just nimble part here
+  const nimbleContact = await externalApis.createNimbleContactFromFacebookLead({
+    integrationSettings,
+    facebookLead,
+    leadGenInfo
   });
+
+  pushProgress.nimbleContact = nimbleContact
+
+  const nimbleDeal = await externalApis.createNimbleDealWithContact({integrationSettings, nimbleContact})
 }
 
 app.get(`${constants.pageCredentialsEndpoint}/:shortTermToken`, async function (req, res) {

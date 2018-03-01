@@ -1,4 +1,5 @@
 const request = require('request-promise-native');
+const lodash = require('lodash')
 
 const constants = require('../shared/constants');
 const taistAddonAccessToken = process.env.TAIST_ADDON_ACCESS_TOKEN;
@@ -56,16 +57,7 @@ module.exports = {
     });
   },
 
-  pushLeadToNimble ({ accessToken, lead }) {
-    return _queryNimbleApi('/contact', {
-      record_type: 'person',
-      fields: {
-
-      }
-    }, 'POST', accessToken)
-  },
-
-  getFacebookLeadInfo ({ accessToken, leadId }) {
+  getFacebookLead ({ accessToken, leadId }) {
     return _queryFacebookApi(`/${leadId}`, {access_token: accessToken})
   },
 
@@ -76,6 +68,59 @@ module.exports = {
       keyPath,
       keyValue: pageId,
     });
+  },
+
+  async createNimbleContactFromFacebookLead ({ integrationSettings, facebookLead, leadGenInfo }) {
+    const nimbleContactFields = {}
+
+    //const fieldMapping = integrationSettings.fieldMapping
+
+    const leadOwnFeilds = facebookLead.fieldData.map(fieldData => ({
+      name: fieldData.name,
+      // TODO: check real cases of multiple values
+      value: fieldData.values.join('')
+    }));
+
+    const usableLeadGenFields = ['page_id', 'form_id', 'leadgen_id']
+    const leadGenFields = usableLeadGenFields.map(fieldName => ({
+      name: 'lead_gen.' + fieldName,
+      value: leadGenInfo[fieldName]
+    }))
+
+    const allLeadFields = leadOwnFeilds.concat(leadGenFields)
+
+    const fieldMapping = {
+      email: "",
+      first_name: "",
+      last_name: "",
+      phone_number: "",
+      'lead_gen.form_id': null,
+      'lead_gen.page_id': null,
+    }
+
+    allLeadFields.forEach((leadField) => {
+      const nimbleFieldPath = fieldMapping[leadField.name]
+
+      if (nimbleFieldPath) {
+        lodash.set(nimbleContactFields, nimbleFieldPath, [{
+          value: leadField.value,
+          modifier: ''
+        }])
+      }
+    })
+
+    console.log('>>>> externalApis.js#createNimbleContactFromFacebookLead()\t - filled nimbleLead: ', nimbleContactFields);
+
+    const contact = await _queryNimbleApi('/contact', {
+      record_type: 'person',
+      fields: nimbleContactFields
+    }, 'POST', integrationSettings.accessToken)
+
+    return contact
+  },
+
+  createNimbleDealWithContact ({ integrationSettings, nimbleContact }) {
+    return null
   },
 };
 

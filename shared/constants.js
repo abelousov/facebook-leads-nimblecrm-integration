@@ -23,5 +23,5 @@ module.exports = {
   nimbleStageIdKeyInSettings: 'nimbleStageId',
   nimbleResponsibleIdKeyInSettings: 'nimbleResponsibleId',
 
-  nimbleApiRoot: 'https://app.nimble.com/api'
+  nimbleApiRoot: 'https://app.nimble.com/api/v1'
 }

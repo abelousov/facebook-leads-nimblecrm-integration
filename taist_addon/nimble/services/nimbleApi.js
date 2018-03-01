@@ -13,7 +13,7 @@ export default {
 
   async getPipelines () {
     const pipelinesResponse = await this._sendRequest({
-      path: '/v1/deals/pipelines',
+      path: '/deals/pipelines',
       method: 'GET'
     })
 
