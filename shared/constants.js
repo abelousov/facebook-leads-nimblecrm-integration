@@ -25,5 +25,6 @@ module.exports = {
 
   fieldMappingKeyInSettings: 'fieldMapping',
 
-  nimbleApiRoot: 'https://app.nimble.com/api/v1'
+  nimbleApiRoot: 'https://app.nimble.com/api/v1',
+  nimbleOldApiRoot: 'https://app.nimble.com/api'
 }

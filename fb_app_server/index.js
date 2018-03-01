@@ -46,13 +46,7 @@ app.post(facebookWebhookEndpointPath, function (req, res) {
 
   const result = req.body;
 
-  console.log('>>>> index.js#processing entry()\t - : ', JSON.stringify(result.entry, null, 2));
-  result.entry.forEach((pageEntry) => {
-    pageEntry.changes.forEach((leadChange) => {
-      const leadGenInfo = leadChange.value;
-      pushLead(leadGenInfo);
-    });
-  });
+  _processLeadsEntry(result.entry);
   res.sendStatus(200);
 });
 
@@ -60,6 +54,15 @@ app.get(constants.facebookLoginCallbackPath, function (req, res) {
   res.sendStatus(200);
 });
 
+function _processLeadsEntry(entries) {
+  console.log('>>>> index.js#processing entries()\t - : ', JSON.stringify(entries, null, 2));
+  entries.forEach((pageEntry) => {
+    pageEntry.changes.forEach((leadChange) => {
+      const leadGenInfo = leadChange.value;
+      pushLead(leadGenInfo);
+    });
+  });
+}
 async function pushLead (leadGenInfo) {
   const progressTracker = Object.assign({}, leadGenInfo);
   receivedUpdates.unshift(progressTracker);
@@ -94,7 +97,7 @@ async function pushLead (leadGenInfo) {
     const nimblePipeline = await externalApis.getNimblePipeline({integrationSettings, id: integrationSettings[constants.nimblePipelineIdKeyInSettings]})
 
     progressTracker.nimblePipeline = nimblePipeline
-    
+
     const nimbleDeal = await externalApis.createNimbleDealWithContact({ integrationSettings, nimbleContact, nimblePipeline});
 
     progressTracker.nimbleDeal = nimbleDeal;
@@ -102,6 +105,8 @@ async function pushLead (leadGenInfo) {
   catch (error) {
     progressTracker.error = error.message
   }
+  console.log('>>>> index.js#pushLead()\t - all progress: ', progressTracker);
+
 }
 
 app.get(`${constants.pageCredentialsEndpoint}/:shortTermToken`, async function (req, res) {
@@ -119,3 +124,19 @@ app.get(`${constants.pageCredentialsEndpoint}/:shortTermToken`, async function (
 
 app.listen(process.env.PORT || 5000);
 
+// local debug:
+//_processLeadsEntry([{
+//  "changes": [
+//    {
+//      "field": "leadgen",
+//      "value": {
+//        "created_time": 1519902625,
+//        "form_id": "197099237726197",
+//        "page_id": "302533069820881",
+//        "leadgen_id": "197158231053631",
+//      },
+//      "id": "302533069820881",
+//      "time": 1519902626,
+//    },
+//  ],
+//}]);

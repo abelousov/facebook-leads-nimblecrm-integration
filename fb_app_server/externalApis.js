@@ -129,9 +129,9 @@ module.exports = {
 
     const startStage = nimblePipeline.stages[0]
     return _queryNimbleApi('/deals', {
-       subject: `Facebook lead - ${_getContactField('first name')} ${_getContactField('last name')}`,
+       name: `Facebook lead - ${_getContactField('first name')} ${_getContactField('last name')}`,
         "privacy": "private",
-        "owner": { "id": "5a93fd6b2aada656dddca161", "first_name": "", "last_name": "" },
+        probability: 50,
         "primary_contact": nimbleContact.id,
         "owner_id": integrationSettings[constants.nimbleResponsibleIdKeyInSettings],
         "stage_id": startStage.id
@@ -140,9 +140,10 @@ module.exports = {
   },
 
   async getNimblePipeline ({ integrationSettings, id}) {
-    let allPipelines = await _queryNimbleApi(`/deals/pipelines/${id}`,
-      'GET', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
-    return allPipelines.find(pipeline => pipeline.pipeline_id === id)
+    // TODO: deduplicate with frontend logic
+    const allPipelines = await _queryNimbleApi(`/deals/pipelines`,
+      null, 'GET', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
+    return allPipelines.pipelines.find(pipeline => pipeline.pipeline_id === id)
   },
 };
 

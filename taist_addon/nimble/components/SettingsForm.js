@@ -17,8 +17,7 @@ export default class SettingsForm extends React.Component {
           ? <div>
             {this._renderSelectInput('Pipeline:', constants.nimblePipelineIdKeyInSettings, this._getPipelineOptions())}
 
-            {/*TODO: fix nimbleAPi.getUsers to use this*/}
-            {/*{this._renderSelectInput('Responsible:', constants.nimbleResponsibleIdKeyInSettings, this._getResponsibleOptions())}*/}
+            {this._renderSelectInput('Responsible:', constants.nimbleResponsibleIdKeyInSettings, this._getResponsibleOptions())}
 
             {/*TODO: finish mapping field*/}
             {/*{this._renderJsonInput('Field mapping: ', constants.fieldMappingKeyInSettings, DEFAULT_FIELD_MAPPING)}*/}
@@ -41,7 +40,7 @@ export default class SettingsForm extends React.Component {
   }
 
   _getResponsibleOptions () {
-    this.props.nimbleListData.users.map((user) => ({
+    return this.props.nimbleListData.users.map((user) => ({
       value: user.id,
       caption: user.first_name + ' ' + user.last_name
     }))

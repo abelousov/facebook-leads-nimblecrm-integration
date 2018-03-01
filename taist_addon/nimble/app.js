@@ -1,10 +1,12 @@
 import UInjector from './services/uiInjector'
 import facebookSdk from './services/facebookSdk'
+import nimbleApi from "./services/nimbleApi";
 
 export default {
   async start (taistApi) {
     this._uiInjector = new UInjector(taistApi)
 
+    nimbleApi.init()
     await facebookSdk.init()
     this._setRoutes(taistApi)
   },

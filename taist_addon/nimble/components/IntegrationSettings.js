@@ -111,7 +111,7 @@ export default class IntegrationSettings extends React.Component {
     if (nimbleApi.isAvailable()) {
       nimbleListData = {
         pipelines: await nimbleApi.getPipelines(),
-        //users: await nimbleApi.getUsers()
+        users: await nimbleApi.getUsers()
       }
     }
 
