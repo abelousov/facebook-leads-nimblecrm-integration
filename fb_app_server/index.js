@@ -61,16 +61,16 @@ app.get(constants.facebookLoginCallbackPath, function (req, res) {
 });
 
 async function pushLead (leadGenInfo) {
-  const pushProgress = Object.assign({}, leadGenInfo)
+  const progressTracker = Object.assign({}, leadGenInfo)
 
-  receivedUpdates.unshift(pushProgress)
+  receivedUpdates.unshift(progressTracker)
 
   const taistCompanyId = await externalApis.getTaistCompanyIdByPageId(leadGenInfo.page_id);
 
   const integrationSettings = await externalApis.getIntegrationSettings(taistCompanyId);
 
-  pushProgress.taistCompanyId = taistCompanyId
-  pushProgress.integrationSettings = integrationSettings
+  progressTracker.taistCompanyId = taistCompanyId
+  progressTracker.integrationSettings = integrationSettings
 
   let facebookPageAccessToken = integrationSettings[constants.facebookAccessTokenKeyInSettings];
 
@@ -79,17 +79,18 @@ async function pushLead (leadGenInfo) {
     leadId: leadGenInfo.leadgen_id,
   });
 
-  pushProgress.facebookLead = facebookLead
+  progressTracker.facebookLead = facebookLead
 
   //TODO: associate forms with campaigns or some custom field
   //TODO: restructure settings to pass just nimble part here
   const nimbleContact = await externalApis.createNimbleContactFromFacebookLead({
     integrationSettings,
     facebookLead,
-    leadGenInfo
+    leadGenInfo,
+    progressTracker
   });
 
-  pushProgress.nimbleContact = nimbleContact
+  progressTracker.nimbleContact = nimbleContact
 
   const nimbleDeal = await externalApis.createNimbleDealWithContact({integrationSettings, nimbleContact})
 }

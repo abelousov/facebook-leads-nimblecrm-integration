@@ -70,11 +70,11 @@ module.exports = {
     });
   },
 
-  async createNimbleContactFromFacebookLead ({ integrationSettings, facebookLead, leadGenInfo }) {
-    const nimbleContactFields = {}
+  async createNimbleContactFromFacebookLead ({ integrationSettings, facebookLead, leadGenInfo, progressTracker}) {
 
     //const fieldMapping = integrationSettings.fieldMapping
 
+    console.log('>>>> externalApis.js#createNimbleContactFromFacebookLead()\t - check facebookLead: ', typeof facebookLead, Object.keys(facebookLead));
     const leadOwnFeilds = facebookLead.field_data.map(fieldData => ({
       name: fieldData.name,
       // TODO: check real cases of multiple values
@@ -89,6 +89,8 @@ module.exports = {
 
     const allLeadFields = leadOwnFeilds.concat(leadGenFields)
 
+    progressTracker.allLeadFields = allLeadFields
+
     const fieldMapping = {
       email: "",
       first_name: "",
@@ -98,6 +100,7 @@ module.exports = {
       'lead_gen.page_id': null,
     }
 
+    const nimbleContactFields = {}
     allLeadFields.forEach((leadField) => {
       const nimbleFieldPath = fieldMapping[leadField.name]
 
@@ -109,7 +112,7 @@ module.exports = {
       }
     })
 
-    console.log('>>>> externalApis.js#createNimbleContactFromFacebookLead()\t - filled nimbleLead: ', nimbleContactFields);
+    progressTracker.nimbleContactFields = nimbleContactFields
 
     const contact = await _queryNimbleApi('/contact', {
       record_type: 'person',
