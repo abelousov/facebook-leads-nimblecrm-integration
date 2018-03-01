@@ -26,7 +26,7 @@ export default class SettingsForm extends React.Component {
         }
 
         <div>
-          <input type="submit" value="Save"/>
+          <input type="submit" value="Save settings"/>
         </div>
       </form>
     </div>;
@@ -94,9 +94,12 @@ export default class SettingsForm extends React.Component {
   _renderSettingInput ({ caption, type, settingKey, children, defaultValue}) {
     const value = this._getSettingValue(settingKey) || defaultValue;
 
+    const inputStyleAndLabelStyle = { display: "inline-block", minWidth: "200px" };
+
     const props = {
       value,
       onChange: (event) => this._updateSetting(settingKey, event.target.value),
+      style: inputStyleAndLabelStyle
     };
 
     let tagName;
@@ -113,9 +116,9 @@ export default class SettingsForm extends React.Component {
         props.type = type;
     }
 
-    return <div>
+    return <div style={{marginBottom: "5px"}}>
       <label>
-        {caption}
+        <span style={inputStyleAndLabelStyle}>{caption}</span>
         {React.createElement(tagName, props, children)}
       </label>
     </div>;

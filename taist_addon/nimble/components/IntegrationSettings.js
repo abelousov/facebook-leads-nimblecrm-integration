@@ -23,7 +23,8 @@ export default class IntegrationSettings extends React.Component {
   render () {
     if (this.state.loaded) {
       return <div>
-        <h3>Facebook integration settings:</h3>
+        <h3>Facebook leads integration:</h3>
+        <h4>v0.1: all leads from all forms get into single pipeline, forms and campaigns are not tracked yet</h4>
         <br/>
         <div>
           {this.state.isLoggedIntoFacebook ? null : this._renderFacebookLogin()}
