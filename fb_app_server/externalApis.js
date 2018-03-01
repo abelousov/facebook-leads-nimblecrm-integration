@@ -1,5 +1,5 @@
 const request = require('request-promise-native');
-const lodash = require('lodash')
+const lodash = require('lodash');
 
 const constants = require('../shared/constants');
 const taistAddonAccessToken = process.env.TAIST_ADDON_ACCESS_TOKEN;
@@ -26,28 +26,28 @@ module.exports = {
       redirect_uri: fullFacebookLoginRedirectUri,
     });
 
-    const longLiveUserToken = longLiveUserTokenResponse.access_token
+    const longLiveUserToken = longLiveUserTokenResponse.access_token;
 
     console.log('>>>> externalApis.js#getFacebookPageCredentials()\t - retrieved long live user token: ', longLiveUserToken);
 
     const pagesData = await _queryFacebookApi('/me/accounts', {
-      access_token: longLiveUserToken
-    })
+      access_token: longLiveUserToken,
+    });
 
     console.log('>>>> externalApis.js#getFacebookPageCredentials()\t - retrieved pages data: ', pagesData);
 
     // TODO: let user choose what pages to subscribe to
-    const firstPage = pagesData.data[0]
+    const firstPage = pagesData.data[0];
 
-    const accessToken = firstPage.access_token
-    const pageId = firstPage.id
+    const accessToken = firstPage.access_token;
+    const pageId = firstPage.id;
 
     //subscribe to the page
     // TODO: don't subscribe multiple times
-    await _queryFacebookApi(`/${pageId}/subscribed_apps`, {access_token: accessToken}, 'POST')
+    await _queryFacebookApi(`/${pageId}/subscribed_apps`, { access_token: accessToken }, 'POST');
 
     console.log('>>>> externalApis.js#getFacebookPageCredentials()\t - subscribed to the page: ', pageId);
-    return {accessToken, pageId}
+    return { accessToken, pageId };
   },
 
   getIntegrationSettings (taistCompanyId) {
@@ -58,7 +58,7 @@ module.exports = {
   },
 
   getFacebookLead ({ accessToken, leadId }) {
-    return _queryFacebookApi(`/${leadId}`, {access_token: accessToken})
+    return _queryFacebookApi(`/${leadId}`, { access_token: accessToken });
   },
 
   getTaistCompanyIdByPageId (pageId) {
@@ -70,61 +70,83 @@ module.exports = {
     });
   },
 
-  async createNimbleContactFromFacebookLead ({ integrationSettings, facebookLead, leadGenInfo, progressTracker}) {
-
-    //const fieldMapping = integrationSettings.fieldMapping
+  async createNimbleContactFromFacebookLead ({ integrationSettings, facebookLead, leadGenInfo, progressTracker }) {
 
     console.log('>>>> externalApis.js#createNimbleContactFromFacebookLead()\t - check facebookLead: ', typeof facebookLead, Object.keys(facebookLead));
     const leadOwnFeilds = facebookLead.field_data.map(fieldData => ({
       name: fieldData.name,
       // TODO: check real cases of multiple values
-      value: fieldData.values.join('')
+      value: fieldData.values.join(''),
     }));
 
-    const usableLeadGenFields = ['page_id', 'form_id', 'leadgen_id']
+    const usableLeadGenFields = ['page_id', 'form_id', 'leadgen_id'];
     const leadGenFields = usableLeadGenFields.map(fieldName => ({
       name: 'lead_gen.' + fieldName,
-      value: leadGenInfo[fieldName]
-    }))
+      value: leadGenInfo[fieldName],
+    }));
 
-    const allLeadFields = leadOwnFeilds.concat(leadGenFields)
+    const allLeadFields = leadOwnFeilds.concat(leadGenFields);
 
-    progressTracker.allLeadFields = allLeadFields
+    progressTracker.allLeadFields = allLeadFields;
 
-    const fieldMapping = {
-      email: {path: "email", modifier: "personal"},
-      first_name: {path: "first name", modifier: ''},
+    // TODO: enable user to set it
+    const contactFieldMapping = {
+      email: { path: "email", modifier: "personal" },
+      first_name: { path: "first name", modifier: '' },
       last_name: { path: "last name", modifier: '' },
       // TODO: add support of modifiers
       phone_number: { path: "phone", modifier: "main" },
       'lead_gen.form_id': null,
       'lead_gen.page_id': null,
-    }
+    };
 
-    const nimbleContactFields = {}
+    const nimbleContactFields = {};
     allLeadFields.forEach((leadField) => {
-      const nimbleFieldDescription = fieldMapping[leadField.name]
+      const nimbleFieldDescription = contactFieldMapping[leadField.name];
 
       if (nimbleFieldDescription) {
         lodash.set(nimbleContactFields, nimbleFieldDescription.path, [{
           value: leadField.value,
-          modifier: nimbleFieldDescription.modifier
-        }])
+          modifier: nimbleFieldDescription.modifier,
+        }]);
       }
-    })
+    });
 
-    progressTracker.nimbleContactFields = nimbleContactFields
+    progressTracker.nimbleContactFields = nimbleContactFields;
 
     const contact = await _queryNimbleApi('/contact', {
       record_type: 'person',
-      fields: nimbleContactFields
-    }, 'POST', integrationSettings.nimbleAccessToken)
+      fields: nimbleContactFields,
+    }, 'POST', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
 
-    return contact
+    return contact;
   },
 
-  createNimbleDealWithContact ({ integrationSettings, nimbleContact }) {
-    return null
+  createNimbleDealWithContact ({ integrationSettings, nimbleContact, stage}) {
+    function _getContactField(fieldName) {
+      return nimbleContact.fields[fieldName].value
+    }
+    return _queryNimbleApi('/deals', {
+       subject: `Facebook lead - ${_getContactField('first name')} ${_getContactField('last name')}`,
+        "privacy": "private",
+        "owner": { "id": "5a93fd6b2aada656dddca161", "first_name": "", "last_name": "" },
+        "primary_contact": nimbleContact.id,
+        "owner_id": integrationSettings[constants.nimbleResponsibleIdKeyInSettings],
+        "stage_id": stage.id
+      },
+      'POST', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
+  },
+
+  getNimblePipeline ({ integrationSettings, id}) {
+    return _queryNimbleApi('/pipelines', {
+       subject: `Facebook lead - ${_getContactField('first name')} ${_getContactField('last name')}`,
+        "privacy": "private",
+        "owner": { "id": "5a93fd6b2aada656dddca161", "first_name": "", "last_name": "" },
+        "primary_contact": nimbleContact.id,
+        "owner_id": integrationSettings[constants.nimbleResponsibleIdKeyInSettings],
+        "stage_id": stage.id
+      },
+      'GET', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
   },
 };
 
@@ -141,6 +163,7 @@ function _queryFacebookApi (path, params, method) {
 }
 
 // TODO: deduplicate with client-side nimble api wrapper
+// TODO: instantiate services and provide auth tokens to them to not pass them from client code
 function _queryNimbleApi (path, params, method, accessToken) {
   return _queryRemoteApi(constants.nimbleApiRoot, path, params, method, {
     "Authorization": "Bearer " + accessToken,
@@ -150,16 +173,16 @@ function _queryNimbleApi (path, params, method, accessToken) {
 async function _queryRemoteApi (rootUrl, path, params, method = 'GET', headers) {
   let url = rootUrl + path;
 
-  const shouldPassParamsInUrl = method === 'GET'
+  const shouldPassParamsInUrl = method === 'GET';
 
-  const paramsOptionKey = shouldPassParamsInUrl ? 'qs' : 'body'
+  const paramsOptionKey = shouldPassParamsInUrl ? 'qs' : 'body';
 
   const requestOptions = {
     method,
     uri: url,
     [paramsOptionKey]: params,
     headers,
-    json: true
+    json: true,
   };
 
   console.log('>>>> externalApis.js#_queryRemoteApi()\t - sending request: ', requestOptions);
@@ -171,6 +194,6 @@ async function _queryRemoteApi (rootUrl, path, params, method = 'GET', headers) 
     console.log('>>>> externalApis.js#_queryRemoteApi()\t - error in request: ', requestOptions.uri, error.message);
 
     //shorten further error output
-    throw new Error(error.message)
+    throw new Error(error.message);
   }
 }

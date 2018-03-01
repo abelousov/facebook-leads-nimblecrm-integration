@@ -49,9 +49,9 @@ app.post(facebookWebhookEndpointPath, function (req, res) {
   console.log('>>>> index.js#processing entry()\t - : ', JSON.stringify(result.entry, null, 2));
   result.entry.forEach((pageEntry) => {
     pageEntry.changes.forEach((leadChange) => {
-      const leadGenInfo = leadChange.value
+      const leadGenInfo = leadChange.value;
       pushLead(leadGenInfo);
-    })
+    });
   });
   res.sendStatus(200);
 });
@@ -61,38 +61,44 @@ app.get(constants.facebookLoginCallbackPath, function (req, res) {
 });
 
 async function pushLead (leadGenInfo) {
-  const progressTracker = Object.assign({}, leadGenInfo)
+  const progressTracker = Object.assign({}, leadGenInfo);
+  receivedUpdates.unshift(progressTracker);
 
-  receivedUpdates.unshift(progressTracker)
+  try {
+    const taistCompanyId = await externalApis.getTaistCompanyIdByPageId(leadGenInfo.page_id);
+    progressTracker.taistCompanyId = taistCompanyId;
 
-  const taistCompanyId = await externalApis.getTaistCompanyIdByPageId(leadGenInfo.page_id);
+    const integrationSettings = await externalApis.getIntegrationSettings(taistCompanyId);
+    progressTracker.integrationSettings = integrationSettings;
 
-  const integrationSettings = await externalApis.getIntegrationSettings(taistCompanyId);
+    let facebookPageAccessToken = integrationSettings[constants.facebookAccessTokenKeyInSettings];
 
-  progressTracker.taistCompanyId = taistCompanyId
-  progressTracker.integrationSettings = integrationSettings
+    const facebookLead = await externalApis.getFacebookLead({
+      accessToken: facebookPageAccessToken,
+      leadId: leadGenInfo.leadgen_id,
+    });
 
-  let facebookPageAccessToken = integrationSettings[constants.facebookAccessTokenKeyInSettings];
+    progressTracker.facebookLead = facebookLead;
 
-  const facebookLead = await externalApis.getFacebookLead({
-    accessToken: facebookPageAccessToken,
-    leadId: leadGenInfo.leadgen_id,
-  });
+    //TODO: associate forms with campaigns or some custom field
+    //TODO: restructure settings to pass just nimble part here
+    const nimbleContact = await externalApis.createNimbleContactFromFacebookLead({
+      integrationSettings,
+      facebookLead,
+      leadGenInfo,
+      progressTracker,
+    });
 
-  progressTracker.facebookLead = facebookLead
+    progressTracker.nimbleContact = nimbleContact;
 
-  //TODO: associate forms with campaigns or some custom field
-  //TODO: restructure settings to pass just nimble part here
-  const nimbleContact = await externalApis.createNimbleContactFromFacebookLead({
-    integrationSettings,
-    facebookLead,
-    leadGenInfo,
-    progressTracker
-  });
+    const nimblePipeline = await externalApis.getNimblePipeline({integrationSettings, id: integrationSettings[constants.nimblePipelineIdKeyInSettings]})
+    const nimbleDeal = await externalApis.createNimbleDealWithContact({ integrationSettings, nimbleContact });
 
-  progressTracker.nimbleContact = nimbleContact
-
-  const nimbleDeal = await externalApis.createNimbleDealWithContact({integrationSettings, nimbleContact})
+    progressTracker.nimbleDeal = nimbleDeal;
+  }
+  catch (error) {
+    progressTracker.error = error
+  }
 }
 
 app.get(`${constants.pageCredentialsEndpoint}/:shortTermToken`, async function (req, res) {

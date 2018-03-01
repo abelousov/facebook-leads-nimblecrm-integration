@@ -20,7 +20,8 @@ export default class SettingsForm extends React.Component {
             {/*TODO: fix nimbleAPi.getUsers to use this*/}
             {/*{this._renderSelectInput('Responsible:', constants.nimbleResponsibleIdKeyInSettings, this._getResponsibleOptions())}*/}
 
-            {this._renderJsonInput('Field mapping: ', constants.fieldMappingKeyInSettings, DEFAULT_FIELD_MAPPING)}
+            {/*TODO: finish mapping field*/}
+            {/*{this._renderJsonInput('Field mapping: ', constants.fieldMappingKeyInSettings, DEFAULT_FIELD_MAPPING)}*/}
           </div>
           : null
         }
