@@ -75,7 +75,7 @@ module.exports = {
 
     //const fieldMapping = integrationSettings.fieldMapping
 
-    const leadOwnFeilds = facebookLead.fieldData.map(fieldData => ({
+    const leadOwnFeilds = facebookLead.field_data.map(fieldData => ({
       name: fieldData.name,
       // TODO: check real cases of multiple values
       value: fieldData.values.join('')
