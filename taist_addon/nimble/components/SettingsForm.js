@@ -20,7 +20,7 @@ export default class SettingsForm extends React.Component {
             {/*TODO: fix nimbleAPi.getUsers to use this*/}
             {/*{this._renderSelectInput('Responsible:', constants.nimbleResponsibleIdKeyInSettings, this._getResponsibleOptions())}*/}
 
-            {this._renderJsonInput('Field mapping: ', constants.fieldMappingKeyInSettings, DEFAULT_MAPPING)}
+            {this._renderJsonInput('Field mapping: ', constants.fieldMappingKeyInSettings, DEFAULT_FIELD_MAPPING)}
           </div>
           : null
         }
@@ -56,14 +56,14 @@ export default class SettingsForm extends React.Component {
     });
   }
 
-  _renderJsonInput (caption, settingKey) {
+  _renderJsonInput (caption, settingKey, defaultValue) {
     //TODO: valudate json in place
     return this._renderSettingInput({
       caption,
       type: 'textarea',
       settingKey,
       children: null,
-      defaultValue: ''
+      defaultValue
     });
   }
 
@@ -134,4 +134,13 @@ export default class SettingsForm extends React.Component {
   _getSettingValue (settingKey) {
     return this._getCurrentSettings()[settingKey];
   }
+}
+
+const DEFAULT_FIELD_MAPPING = {
+  email: "email",
+  first_name: "first name",
+  last_name: "last name",
+  phone_number: "phone",
+  'lead_gen.form_id': null,
+  'lead_gen.page_id': null,
 }
