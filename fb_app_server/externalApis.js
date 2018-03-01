@@ -122,30 +122,25 @@ module.exports = {
     return contact;
   },
 
-  createNimbleDealWithContact ({ integrationSettings, nimbleContact, stage}) {
+  createNimbleDealWithContact ({ integrationSettings, nimbleContact, nimblePipeline}) {
     function _getContactField(fieldName) {
       return nimbleContact.fields[fieldName].value
     }
+
+    const startStage = nimblePipeline.stages[0]
     return _queryNimbleApi('/deals', {
        subject: `Facebook lead - ${_getContactField('first name')} ${_getContactField('last name')}`,
         "privacy": "private",
         "owner": { "id": "5a93fd6b2aada656dddca161", "first_name": "", "last_name": "" },
         "primary_contact": nimbleContact.id,
         "owner_id": integrationSettings[constants.nimbleResponsibleIdKeyInSettings],
-        "stage_id": stage.id
+        "stage_id": startStage.id
       },
       'POST', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
   },
 
   getNimblePipeline ({ integrationSettings, id}) {
-    return _queryNimbleApi('/pipelines', {
-       subject: `Facebook lead - ${_getContactField('first name')} ${_getContactField('last name')}`,
-        "privacy": "private",
-        "owner": { "id": "5a93fd6b2aada656dddca161", "first_name": "", "last_name": "" },
-        "primary_contact": nimbleContact.id,
-        "owner_id": integrationSettings[constants.nimbleResponsibleIdKeyInSettings],
-        "stage_id": stage.id
-      },
+    return _queryNimbleApi(`/pipelines/${id}`,
       'GET', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
   },
 };

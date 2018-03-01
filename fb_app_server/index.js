@@ -92,12 +92,13 @@ async function pushLead (leadGenInfo) {
     progressTracker.nimbleContact = nimbleContact;
 
     const nimblePipeline = await externalApis.getNimblePipeline({integrationSettings, id: integrationSettings[constants.nimblePipelineIdKeyInSettings]})
-    const nimbleDeal = await externalApis.createNimbleDealWithContact({ integrationSettings, nimbleContact });
+
+    const nimbleDeal = await externalApis.createNimbleDealWithContact({ integrationSettings, nimbleContact, nimblePipeline});
 
     progressTracker.nimbleDeal = nimbleDeal;
   }
   catch (error) {
-    progressTracker.error = error
+    progressTracker.error = error.message
   }
 }
 
