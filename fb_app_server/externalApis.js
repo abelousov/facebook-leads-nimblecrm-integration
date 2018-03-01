@@ -96,7 +96,7 @@ module.exports = {
       first_name: {path: "first name", modifier: ''},
       last_name: { path: "last name", modifier: '' },
       // TODO: add support of modifiers
-      phone_number: { path: "phone", modifier: "personal" },
+      phone_number: { path: "phone", modifier: "main" },
       'lead_gen.form_id': null,
       'lead_gen.page_id': null,
     }
