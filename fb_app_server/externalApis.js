@@ -117,7 +117,7 @@ module.exports = {
     const contact = await _queryNimbleApi('/contact', {
       record_type: 'person',
       fields: nimbleContactFields
-    }, 'POST', integrationSettings.accessToken)
+    }, 'POST', integrationSettings.nimbleAccessToken)
 
     return contact
   },
@@ -167,8 +167,9 @@ async function _queryRemoteApi (rootUrl, path, params, method = 'GET', headers) 
     return await request(requestOptions);
   }
   catch (error) {
-    console.log('>>>> externalApis.js#_queryRemoteApi()\t - error in request: ', error, requestOptions.uri);
+    console.log('>>>> externalApis.js#_queryRemoteApi()\t - error in request: ', requestOptions.uri, error.message);
 
-    throw error
+    //shorten further error output
+    throw new Error(error.message)
   }
 }
