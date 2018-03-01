@@ -95,7 +95,8 @@ module.exports = {
       email: "email",
       first_name: "first name",
       last_name: "last name",
-      phone_number: "phone",
+      // TODO: add support of modifiers
+      //phone_number: "phone",
       'lead_gen.form_id': null,
       'lead_gen.page_id': null,
     }
