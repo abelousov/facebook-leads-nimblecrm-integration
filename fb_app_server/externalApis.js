@@ -92,23 +92,23 @@ module.exports = {
     progressTracker.allLeadFields = allLeadFields
 
     const fieldMapping = {
-      email: "email",
-      first_name: "first name",
-      last_name: "last name",
+      email: {path: "email", modifier: "personal"},
+      first_name: {path: "first name", modifier: ''},
+      last_name: { path: "last name", modifier: '' },
       // TODO: add support of modifiers
-      //phone_number: "phone",
+      phone_number: { path: "phone", modifier: "personal" },
       'lead_gen.form_id': null,
       'lead_gen.page_id': null,
     }
 
     const nimbleContactFields = {}
     allLeadFields.forEach((leadField) => {
-      const nimbleFieldPath = fieldMapping[leadField.name]
+      const nimbleFieldDescription = fieldMapping[leadField.name]
 
-      if (nimbleFieldPath) {
-        lodash.set(nimbleContactFields, nimbleFieldPath, [{
+      if (nimbleFieldDescription) {
+        lodash.set(nimbleContactFields, nimbleFieldDescription.path, [{
           value: leadField.value,
-          modifier: ''
+          modifier: nimbleFieldDescription.modifier
         }])
       }
     })
