@@ -11,8 +11,7 @@ const facebookApiRoot = 'https://graph.facebook.com/v2.12';
 // TODO: extract into Taist server-side SDK
 const taistApiRoot = 'https://www.tai.st/api/0.2/addonApi';
 
-// TODO: account for production as well, retrieve dynamically
-const appServerApiRootUrl = 'http://localhost:5000';
+const appServerApiRootUrl = constants.appServerRootUrl;
 const fullFacebookLoginRedirectUri = appServerApiRootUrl + constants.facebookLoginCallbackPath;
 
 // TODO: split into separate app-specific services

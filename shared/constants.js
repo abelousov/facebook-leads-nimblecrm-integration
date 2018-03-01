@@ -14,8 +14,8 @@ module.exports = {
   // environments should not depend on webpack build targets (dev/production),
   // so that a development version could be build that uses production config
 
-  //appServerRootUrl: 'https://facebook-leads-nimblecrm.herokuapp.com',
-  appServerRootUrl: 'localhost:5000',
+  appServerRootUrl: 'https://facebook-leads-nimblecrm.herokuapp.com',
+  //appServerRootUrl: 'localhost:5000',
 
   pageCredentialsEndpoint: '/facebookPageCredentials',
 
