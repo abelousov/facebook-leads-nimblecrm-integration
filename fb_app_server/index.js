@@ -93,6 +93,8 @@ async function pushLead (leadGenInfo) {
 
     const nimblePipeline = await externalApis.getNimblePipeline({integrationSettings, id: integrationSettings[constants.nimblePipelineIdKeyInSettings]})
 
+    progressTracker.nimblePipeline = nimblePipeline
+    
     const nimbleDeal = await externalApis.createNimbleDealWithContact({ integrationSettings, nimbleContact, nimblePipeline});
 
     progressTracker.nimbleDeal = nimbleDeal;

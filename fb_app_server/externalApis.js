@@ -139,9 +139,10 @@ module.exports = {
       'POST', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
   },
 
-  getNimblePipeline ({ integrationSettings, id}) {
-    return _queryNimbleApi(`/pipelines/${id}`,
+  async getNimblePipeline ({ integrationSettings, id}) {
+    let allPipelines = await _queryNimbleApi(`/deals/pipelines/${id}`,
       'GET', integrationSettings[constants.nimbleAccessTokenKeyInSettings]);
+    return allPipelines.find(pipeline => pipeline.pipeline_id === id)
   },
 };
 
