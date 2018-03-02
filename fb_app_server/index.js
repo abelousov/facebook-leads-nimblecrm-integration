@@ -103,7 +103,7 @@ async function pushLead (leadGenInfo) {
     progressTracker.nimbleDeal = nimbleDeal;
   }
   catch (error) {
-    progressTracker.error = error.message
+    progressTracker.error = error
   }
   console.log('>>>> index.js#pushLead()\t - all entry progress: ', progressTracker);
 
