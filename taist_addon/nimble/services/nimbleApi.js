@@ -15,7 +15,7 @@ export default {
   },
 
   isAvailable () {
-    return !!this._accessToken;
+    return !!this._accessToken && !!this._oldShortTermAccessToken;
   },
 
   async getPipelines () {

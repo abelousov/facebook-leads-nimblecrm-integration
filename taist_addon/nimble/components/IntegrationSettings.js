@@ -27,7 +27,7 @@ export default class IntegrationSettings extends React.Component {
         <h4>v0.1: all leads from all forms get into single pipeline, forms and campaigns are not tracked yet</h4>
         <br/>
         <div>
-          {this.state.isLoggedIntoFacebook ? null : this._renderFacebookLogin()}
+          {(this._isFacebookSetUp() || this.state.isLoggedIntoFacebook) ? null : this._renderFacebookLogin()}
         </div>
         <SettingsForm
           value={this.state.settingsData}
@@ -117,6 +117,10 @@ export default class IntegrationSettings extends React.Component {
     }
 
     this.setState({nimbleListData})
+  }
+
+  _isFacebookSetUp () {
+    return this.state.settingsData && !!this.state.settingsData[constants.facebookPageIdKeyInSettings]
   }
 
   async _checkFacebookLogin () {
